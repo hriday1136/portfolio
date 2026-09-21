@@ -59,6 +59,7 @@ export function OrbitalSite() {
           <div className="hero" id="hero">
             <div className="planet-glow" aria-hidden="true" />
             <div className="planet" id="planet" aria-hidden="true" />
+            <div className="planet-depth" aria-hidden="true" />
 
             <svg className="orbit-svg orbit-back" viewBox="0 0 1500 900" aria-hidden="true" id="orbitBack">
               <ellipse
@@ -170,20 +171,13 @@ export function OrbitalSite() {
                 </div>
                 <h2 className="section-title">Selected Missions</h2>
               </div>
-              <div className="projects__index" id="projIndex" aria-hidden="true">
-                <button data-jump="0" className="active">
-                  01 EchoOS
-                </button>
-                <button data-jump="1">02 ClauseWatch</button>
-                <button data-jump="2">03 AccessForge</button>
-              </div>
             </div>
 
             <div className="proj-grid">
-              <div className="proj-visual-col">
-                <div className="proj-visual" id="projVisual">
-                  <div className="proj-stage active m-show" data-stage="0">
-                    <div className="pv-frame" data-label="ECHOOS · LOCAL-FIRST SYSTEM LAYER">
+              <article className="proj-panel">
+                <div className="proj-visual">
+                  <div className="proj-stage">
+                    <div className="pv-frame" data-label="STORAGEKV · LSM-TREE ENGINE">
                       <span className="pv-corner tl" />
                       <span className="pv-corner tr" />
                       <span className="pv-corner bl" />
@@ -191,28 +185,74 @@ export function OrbitalSite() {
                       <div className="echo-core">
                         <div className="echo-ring" style={{ width: "78%", height: "78%" }} />
                         <div className="echo-ring" style={{ width: "52%", height: "52%" }} />
-                        <div className="echo-center">SHELL</div>
+                        <div className="echo-center">LSM</div>
                         <div className="echo-node" style={{ top: "14%", left: "50%" }} />
                         <div className="echo-node" style={{ top: "50%", left: "87%" }} />
                         <div className="echo-node" style={{ top: "84%", left: "52%" }} />
                         <div className="echo-node" style={{ top: "52%", left: "12%" }} />
                         <div className="echo-label" style={{ top: "8%", left: "42%" }}>
-                          LLM · OLLAMA
+                          WAL
                         </div>
                         <div className="echo-label" style={{ top: "48%", right: "2%" }}>
-                          RAG MEMORY
+                          SSTABLES
                         </div>
                         <div className="echo-label" style={{ bottom: "8%", left: "44%" }}>
-                          FILE I/O
+                          COMPACTION
                         </div>
                         <div className="echo-label" style={{ top: "50%", left: 0 }}>
-                          OPENAI
+                          FSYNC
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
+                <div className="proj-mission">Mission 01</div>
+                <h3 className="proj-name">StorageKV</h3>
+                <div className="proj-sub">Embedded LSM-Tree Key-Value Storage Engine</div>
+                <p className="proj-desc">
+                  A RocksDB/LevelDB-inspired key-value storage engine built from scratch in Rust with{" "}
+                  <strong>zero runtime dependencies</strong>. It runs on an{" "}
+                  <strong>LSM-tree architecture</strong> with a WAL, immutable sorted SSTables with
+                  sparse indexing, and size-tiered compaction. <strong>Crash recovery</strong> through
+                  manifest checkpoints and WAL replay enforces fsync ordering and atomic file
+                  installation, verified by <strong>property testing against a reference model</strong>.
+                </p>
+                <div className="metrics">
+                  <div className="metric">
+                    <div className="metric__val">
+                      &lt;12<em>µs</em>
+                    </div>
+                    <div className="metric__lab">p99 read latency</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">
+                      300<em>+</em>
+                    </div>
+                    <div className="metric__lab">Randomized op sequences</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">
+                      ~1000<em>x</em>
+                    </div>
+                    <div className="metric__lab">Durability cost vs. in-memory</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">0</div>
+                    <div className="metric__lab">Runtime dependencies</div>
+                  </div>
+                </div>
+                <div className="proj-tech">
+                  <span>Rust</span>
+                  <span>LSM-tree</span>
+                  <span>WAL</span>
+                  <span>SSTables</span>
+                  <span>Compaction</span>
+                </div>
+              </article>
 
-                  <div className="proj-stage" data-stage="1">
+              <article className="proj-panel">
+                <div className="proj-visual">
+                  <div className="proj-stage">
                     <div className="pv-frame" data-label="CLAUSEWATCH · EXTRACTION PIPELINE">
                       <span className="pv-corner tl" />
                       <span className="pv-corner tr" />
@@ -255,8 +295,52 @@ export function OrbitalSite() {
                       </div>
                     </div>
                   </div>
+                </div>
+                <div className="proj-mission">Mission 02</div>
+                <h3 className="proj-name">ClauseWatch</h3>
+                <div className="proj-sub">AI-Powered Contract Intelligence SaaS</div>
+                <p className="proj-desc">
+                  A multi-tenant SaaS that turns raw contracts into structured, reviewable data. An{" "}
+                  <strong>LLM extraction pipeline</strong> pulls fields from PDF and DOCX with{" "}
+                  <strong>per-field confidence scoring</strong> reaches{" "}
+                  <strong>97.9% field-level accuracy</strong> on a validated 30-document test set.
+                  Tenants are isolated at the ORM layer
+                  with <strong>tenant-scoped queries</strong>, verified for zero cross-tenant leakage
+                  through automated integration tests, and secured with{" "}
+                  <strong>five independent HMAC token systems</strong>.
+                </p>
+                <div className="metrics">
+                  <div className="metric">
+                    <div className="metric__val">5</div>
+                    <div className="metric__lab">HMAC token systems</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">9</div>
+                    <div className="metric__lab">Zero-downtime migrations</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">0</div>
+                    <div className="metric__lab">Cross-tenant leaks</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">
+                      97.9<em>%</em>
+                    </div>
+                    <div className="metric__lab">Field-level accuracy</div>
+                  </div>
+                </div>
+                <div className="proj-tech">
+                  <span>Next.js</span>
+                  <span>FastAPI</span>
+                  <span>PostgreSQL</span>
+                  <span>Alembic</span>
+                  <span>OpenAI</span>
+                </div>
+              </article>
 
-                  <div className="proj-stage" data-stage="2">
+              <article className="proj-panel">
+                <div className="proj-visual">
+                  <div className="proj-stage">
                     <div className="pv-frame" data-label="ACCESSFORGE · REMEDIATION PIPELINE">
                       <span className="pv-corner tl" />
                       <span className="pv-corner tr" />
@@ -291,141 +375,51 @@ export function OrbitalSite() {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="proj-panels" id="projPanels">
-                <article className="proj-panel active" data-panel="0">
-                  <div className="proj-mission">Mission 01</div>
-                  <h3 className="proj-name">EchoOS</h3>
-                  <div className="proj-sub">AI-Native Local System Layer</div>
-                  <p className="proj-desc">
-                    A local-first system layer that augments ordinary OS interactions with autonomous
-                    workflows. The desktop shell is built on <strong>Tauri, React and Tailwind</strong>,
-                    and pairs <strong>OpenAI with local models via Ollama</strong> so automation keeps
-                    working offline. A memory engine built on <strong>ChromaDB embeddings and RAG</strong>{" "}
-                    gives it fast, grounded recall.
-                  </p>
-                  <div className="metrics">
-                    <div className="metric">
-                      <div className="metric__val">
-                        90<em>%</em>
-                      </div>
-                      <div className="metric__lab">Smaller build</div>
+                <div className="proj-mission">Mission 03</div>
+                <h3 className="proj-name">AccessForge</h3>
+                <div className="proj-sub">Accessibility Remediation Pipeline</div>
+                <p className="proj-desc">
+                  An end-to-end pipeline that scans React apps, generates <strong>WCAG fixes</strong>,
+                  verifies them independently, and opens GitHub pull requests. Orchestration runs on a{" "}
+                  <strong>LangGraph deterministic state machine</strong> with a crash-recoverable async
+                  pipeline backed by <strong>PostgreSQL state and Redis/RQ workers</strong>. Fixes
+                  are validated across <strong>2 independent React/Vite codebases</strong> with
+                  multimodal visual-regression comparison, and a{" "}
+                  <strong>confidence-gated localization check</strong> defers to human review instead
+                  of guessing.
+                </p>
+                <div className="metrics">
+                  <div className="metric">
+                    <div className="metric__val">
+                      68<em>%</em>
                     </div>
-                    <div className="metric">
-                      <div className="metric__val">
-                        40<em>%</em>
-                      </div>
-                      <div className="metric__lab">Workflow efficiency</div>
-                    </div>
-                    <div className="metric">
-                      <div className="metric__val">
-                        65<em>%</em>
-                      </div>
-                      <div className="metric__lab">Faster retrieval</div>
-                    </div>
-                    <div className="metric">
-                      <div className="metric__val">
-                        15<em>+</em>
-                      </div>
-                      <div className="metric__lab">Automated workflows</div>
-                    </div>
+                    <div className="metric__lab">Deferred to human review</div>
                   </div>
-                  <div className="proj-tech">
-                    <span>React</span>
-                    <span>Tailwind CSS</span>
-                    <span>Tauri CLI</span>
-                    <span>Node.js</span>
-                    <span>Ollama</span>
-                    <span>ChromaDB</span>
-                    <span>OpenAI</span>
+                  <div className="metric">
+                    <div className="metric__val">
+                      100<em>%</em>
+                    </div>
+                    <div className="metric__lab">First-pass name fixes</div>
                   </div>
-                </article>
-
-                <article className="proj-panel" data-panel="1">
-                  <div className="proj-mission">Mission 02</div>
-                  <h3 className="proj-name">ClauseWatch</h3>
-                  <div className="proj-sub">AI-Powered Contract Intelligence SaaS</div>
-                  <p className="proj-desc">
-                    A multi-tenant SaaS that turns raw contracts into structured, reviewable data. An{" "}
-                    <strong>LLM extraction pipeline</strong> pulls fields from PDF and DOCX with{" "}
-                    <strong>per-field confidence scoring</strong>. Tenants are isolated at the ORM layer
-                    with <strong>tenant-scoped queries</strong>, verified for zero cross-tenant leakage
-                    through automated integration tests, and secured with{" "}
-                    <strong>five independent HMAC token systems</strong>.
-                  </p>
-                  <div className="metrics">
-                    <div className="metric">
-                      <div className="metric__val">5</div>
-                      <div className="metric__lab">HMAC token systems</div>
-                    </div>
-                    <div className="metric">
-                      <div className="metric__val">9</div>
-                      <div className="metric__lab">Zero-downtime migrations</div>
-                    </div>
-                    <div className="metric">
-                      <div className="metric__val">0</div>
-                      <div className="metric__lab">Cross-tenant leaks</div>
-                    </div>
-                    <div className="metric">
-                      <div className="metric__val">2</div>
-                      <div className="metric__lab">Document formats</div>
-                    </div>
+                  <div className="metric">
+                    <div className="metric__val">2</div>
+                    <div className="metric__lab">Independent codebases</div>
                   </div>
-                  <div className="proj-tech">
-                    <span>Next.js</span>
-                    <span>FastAPI</span>
-                    <span>PostgreSQL</span>
-                    <span>Alembic</span>
-                    <span>OpenAI</span>
+                  <div className="metric">
+                    <div className="metric__val">0</div>
+                    <div className="metric__lab">Duplicate branches</div>
                   </div>
-                </article>
-
-                <article className="proj-panel" data-panel="2">
-                  <div className="proj-mission">Mission 03</div>
-                  <h3 className="proj-name">AccessForge</h3>
-                  <div className="proj-sub">Accessibility Remediation Pipeline</div>
-                  <p className="proj-desc">
-                    An end-to-end pipeline that scans React apps, generates <strong>WCAG fixes</strong>,
-                    verifies them independently, and opens GitHub pull requests. Orchestration runs on a{" "}
-                    <strong>LangGraph deterministic state machine</strong> with a crash-recoverable async
-                    pipeline backed by <strong>PostgreSQL state and Redis/RQ workers</strong>. It uses
-                    multimodal visual-regression comparison, confidence-gated source localization, and
-                    ElevenLabs TTS for multilingual audio summaries.
-                  </p>
-                  <div className="metrics">
-                    <div className="metric">
-                      <div className="metric__val">
-                        100<em>%</em>
-                      </div>
-                      <div className="metric__lab">Build pass rate</div>
-                    </div>
-                    <div className="metric">
-                      <div className="metric__val">20</div>
-                      <div className="metric__lab">Benchmark cases</div>
-                    </div>
-                    <div className="metric">
-                      <div className="metric__val">6</div>
-                      <div className="metric__lab">WCAG categories</div>
-                    </div>
-                    <div className="metric">
-                      <div className="metric__val">
-                        10<em>+</em>
-                      </div>
-                      <div className="metric__lab">Audio languages</div>
-                    </div>
-                  </div>
-                  <div className="proj-tech">
-                    <span>FastAPI</span>
-                    <span>LangGraph</span>
-                    <span>PostgreSQL</span>
-                    <span>Redis / RQ</span>
-                    <span>Docker</span>
-                    <span>ElevenLabs</span>
-                    <span>Google OAuth</span>
-                  </div>
-                </article>
-              </div>
+                </div>
+                <div className="proj-tech">
+                  <span>FastAPI</span>
+                  <span>LangGraph</span>
+                  <span>PostgreSQL</span>
+                  <span>Redis / RQ</span>
+                  <span>Docker</span>
+                  <span>Playwright</span>
+                  <span>Axe-core</span>
+                </div>
+              </article>
             </div>
           </div>
         </section>
@@ -477,14 +471,15 @@ export function OrbitalSite() {
                   <span className="exp__loc">New Brunswick, NJ</span>
                   <ul className="exp__body">
                     <li>
-                      Built a new <strong>MCP server tool</strong> exposing the PDB search API to LLM
-                      agents, enabling multi-service AND/OR queries in a single call by composing filter
-                      nodes from 7 extended tools through a custom validation layer.
+                      Orchestrated a new <strong>MCP server tool</strong> exposing the PDB search API to
+                      LLM agents, enabling multi-service AND/OR queries in a single call by composing
+                      the filter nodes from the 7 extended tools through a custom validation layer.
                     </li>
                     <li>
-                      Traced parameter flow against tool documentation to fix{" "}
-                      <strong>two silent data-corruption bugs</strong> in result-grouping logic,
-                      preventing invalid API parameters and user configurations.
+                      Rectified <strong>2 silent data corruption bugs</strong> in the MCP server&apos;s
+                      result-grouping logic by tracing parameter flow against the tool&apos;s own
+                      docstrings, preventing the formation of invalid API parameters and user
+                      configurations.
                     </li>
                   </ul>
                 </article>
@@ -493,21 +488,21 @@ export function OrbitalSite() {
                   <span className="exp__node" aria-hidden="true" />
                   <div className="exp__meta">
                     <span className="exp__org">Rutgers AI &amp; Data Science Collaboratory</span>
-                    <span className="exp__role">Summer Research Fellow · CSII SURF</span>
+                    <span className="exp__role">Summer Research Fellow · CSI SURF</span>
                     <span className="exp__when">May 2026 — Jul 2026</span>
                   </div>
                   <span className="exp__loc">New Brunswick, NJ</span>
                   <ul className="exp__body">
                     <li>
-                      Redesigned a dictionary-driven column-typing model in <strong>py-mmcif&apos;s</strong>{" "}
-                      data-compression pipeline with automatic detection and value-scanning
-                      classification, cutting molecular structure file size by 27% and removing a
-                      dependency on prior processing.
+                      Redesigned a dictionary-driven column-typing classifier in{" "}
+                      <strong>py-mmcif</strong>, an open-source Python package, adding automatic data
+                      type detection to cut molecular structure file sizes by 27%, submitted upstream as
+                      a pull request.
                     </li>
                     <li>
-                      Researched binary-encoding chain algorithms alongside four researchers, improving
-                      floating-point encoding to reduce compressed structure size by up to 76% across 37
-                      varied PDB structures.
+                      Optimized floating-point binary encoding in py-mmcif&apos;s compression pipeline,
+                      cutting compressed file sizes by up to 76% across 37 varied PDB structures, working
+                      with a team of 4 researchers on the encoding chain design.
                     </li>
                   </ul>
                   <div className="exp__metrics">
@@ -618,6 +613,7 @@ export function OrbitalSite() {
                   <span>Tauri</span>
                   <span>MCP</span>
                   <span>Alembic</span>
+                  <span>Redis</span>
                   <span>Neon</span>
                   <span>Cloudflare</span>
                   <span>WSL</span>
@@ -630,8 +626,9 @@ export function OrbitalSite() {
                   <span>React</span>
                   <span>Next.js</span>
                   <span>Tailwind CSS</span>
-                  <span>Pandas</span>
-                  <span>Scikit-Learn</span>
+                  <span>LangGraph</span>
+                  <span>Playwright</span>
+                  <span>Axe-core</span>
                   <span>Git</span>
                   <span>VS Code</span>
                   <span>IntelliJ</span>

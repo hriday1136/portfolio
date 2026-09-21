@@ -2,6 +2,7 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
 export function initOrbital() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -108,6 +109,16 @@ export function initOrbital() {
   navLinks?.addEventListener("click", onNavClick);
   cleanups.push(() => navLinks?.removeEventListener("click", onNavClick));
 
+  const onWorkLink = (e: Event) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href="#work"]');
+    if (!a || !document.documentElement.classList.contains("gsap-active")) return;
+    e.preventDefault();
+    window.scrollTo({ top: planetEntryLen(), behavior: "smooth" });
+    history.replaceState(null, "", "#work");
+  };
+  document.addEventListener("click", onWorkLink);
+  cleanups.push(() => document.removeEventListener("click", onWorkLink));
+
   const brand = document.querySelector<HTMLAnchorElement>(".nav__brand");
   const goHome = (e: Event) => {
     e.preventDefault();
@@ -119,9 +130,20 @@ export function initOrbital() {
   brand?.addEventListener("click", goHome);
   cleanups.push(() => brand?.removeEventListener("click", goHome));
 
+  const heroPin = document.getElementById("hero-pin");
+  // scroll distance (in hero heights) for the dive into the planet
+  const ENTRY = 2.2;
+  const HOLD = 0;
+  const planetEntryLen = () => (heroPin ? heroPin.offsetHeight * ENTRY : 0);
+  const planetPinLen = () => (heroPin ? heroPin.offsetHeight * (ENTRY + HOLD) : 0);
+  const inPlanetEntry = () =>
+    document.documentElement.classList.contains("gsap-active") &&
+    window.scrollY < planetEntryLen() * 0.85;
+
   const onScroll = () => {
     scrollY = window.scrollY;
     nav?.classList.toggle("scrolled", scrollY > 40);
+    if (inPlanetEntry()) links.forEach((l) => l.classList.remove("active"));
   };
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
@@ -134,6 +156,7 @@ export function initOrbital() {
     (entries) => {
       entries.forEach((en) => {
         if (en.isIntersecting) {
+          if (en.target.id === "work" && inPlanetEntry()) return;
           links.forEach((l) =>
             l.classList.toggle("active", l.dataset.sec === en.target.id),
           );
@@ -239,18 +262,20 @@ export function initOrbital() {
   }
 
   if (!reduce) {
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
     const desktop = window.matchMedia("(min-width: 901px)").matches;
     if (desktop) document.documentElement.classList.add("gsap-active");
 
     let heroTl: gsap.core.Timeline | null = null;
     if (desktop) {
       gsap.set("#planet", { xPercent: -50, transformOrigin: "50% 50%" });
+      // The hero is pinned while the camera "enters" the planet; the projects
+      // section (held at the top of the viewport) emerges out of it.
       heroTl = gsap.timeline({
         scrollTrigger: {
           trigger: "#hero-pin",
           start: "top top",
-          end: "+=120%",
+          end: () => "+=" + planetPinLen(),
           scrub: 0.6,
           pin: "#hero-pin",
           pinSpacing: true,
@@ -258,59 +283,130 @@ export function initOrbital() {
         },
       });
       heroTl
-        .to(".hero__name", { yPercent: -28, ease: "none" }, 0)
-        .to(".hero__copy", { opacity: 0, y: -40, ease: "none" }, 0)
-        .to(".hero__top,.hero__foot,.scroll-hint", { opacity: 0, ease: "none" }, 0)
-        .to("#planet", { scale: 1.28, yPercent: -10, ease: "none" }, 0)
-        .to(".planet-glow", { opacity: 1.4, ease: "none" }, 0)
-        .to(".orbit-back,.orbit-front", { opacity: 0, scale: 1.12, ease: "none" }, 0);
+        .to(".hero__name", { yPercent: -28, ease: "none", duration: 0.3 }, 0)
+        .to(".hero__name", { opacity: 0, ease: "none", duration: 0.25 }, 0.3)
+        .to(".hero__copy", { opacity: 0, y: -40, ease: "none", duration: 0.3 }, 0)
+        .to(".hero__top,.hero__foot,.scroll-hint", { opacity: 0, ease: "none", duration: 0.3 }, 0)
+        .to("#planet", { scale: 1.28, yPercent: -10, ease: "none", duration: 0.3 }, 0)
+        .to("#planet", { scale: 3.2, ease: "power2.in", duration: 0.55 }, 0.3)
+        .to(".planet-depth", { opacity: 1, ease: "none", duration: 0.3 }, 0.3)
+        .set("#planet", { autoAlpha: 0 }, 0.6)
+        .to(".planet-glow", { opacity: 1.4, ease: "none", duration: 0.3 }, 0)
+        .to(".planet-glow", { opacity: 0, ease: "none", duration: 0.3 }, 0.55)
+        .to(".orbit-back,.orbit-front", { opacity: 0, scale: 1.12, ease: "none", duration: 0.3 }, 0)
+        .fromTo(
+          "#work",
+          { opacity: 0, scale: 0.6, transformOrigin: "50% 45vh" },
+          { opacity: 1, scale: 1, ease: "power2.out", duration: 0.4 },
+          0.6,
+        )
+        .to({}, { duration: (1 * HOLD) / ENTRY }, 1);
+
+      // Hold the projects section still at the top of the viewport for the
+      // whole pin (it sits one screen above its natural position).
+      const workEl = document.getElementById("work");
+      gsap.fromTo(
+        "#work",
+        { y: () => -planetPinLen() },
+        {
+          y: 0,
+          ease: "none",
+          scrollTrigger: {
+            start: 0,
+            end: () => planetPinLen(),
+            scrub: true,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              if (workEl) workEl.style.pointerEvents =
+                  self.progress * planetPinLen() > planetEntryLen() * 0.85 ? "auto" : "none";
+            },
+          },
+        },
+      );
     }
 
-    const panels = [...document.querySelectorAll(".proj-panel")];
-    const stages = [...document.querySelectorAll(".proj-stage")];
-    const idxBtns = [...document.querySelectorAll<HTMLButtonElement>("#projIndex button")];
+    if (desktop) {
+      // Scroll gate: the projects section is a stop. One gesture always lands
+      // on it (from above or below); a second, separate gesture moves on.
+      let animating = false;
+      let locked = false;
+      let lastInput = 0;
+
+      const goTo = (top: number, duration: number) => {
+        animating = true;
+        gsap.to(window, {
+          scrollTo: { y: top, autoKill: false },
+          duration,
+          ease: "power2.inOut",
+          overwrite: true,
+          onComplete: () => {
+            animating = false;
+            locked = true;
+            lastInput = performance.now();
+          },
+        });
+      };
+
+      const intent = (dir: number, step: number, e: Event) => {
+        const now = performance.now();
+        const gap = now - lastInput;
+        lastInput = now;
+        if (animating) {
+          e.preventDefault();
+          return;
+        }
+        if (locked) {
+          if (gap > 120) locked = false;
+          else {
+            e.preventDefault();
+            return;
+          }
+        }
+        const gate = planetEntryLen();
+        const y = window.scrollY;
+        if (dir > 0 && y < gate - 2) {
+          e.preventDefault();
+          goTo(gate, Math.min(2.4, Math.max(0.8, (gate - y) / 1000)));
+        } else if (dir < 0 && y > gate + 2 && y - step <= gate) {
+          e.preventDefault();
+          goTo(gate, Math.min(1.2, Math.max(0.5, (y - gate) / 1000)));
+        }
+      };
+
+      const onWheel = (e: WheelEvent) => {
+        if (e.ctrlKey || !e.deltaY) return;
+        intent(Math.sign(e.deltaY), Math.abs(e.deltaY), e);
+      };
+      const onKey = (e: KeyboardEvent) => {
+        const t = e.target as HTMLElement;
+        if (e.altKey || e.ctrlKey || e.metaKey || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+        const page = window.innerHeight * 0.9;
+        if (e.key === "ArrowDown") intent(1, 40, e);
+        else if (e.key === "PageDown" || (e.key === " " && !e.shiftKey)) intent(1, page, e);
+        else if (e.key === "ArrowUp") intent(-1, 40, e);
+        else if (e.key === "PageUp" || (e.key === " " && e.shiftKey)) intent(-1, page, e);
+      };
+      window.addEventListener("wheel", onWheel, { passive: false });
+      window.addEventListener("keydown", onKey);
+      cleanups.push(() => {
+        window.removeEventListener("wheel", onWheel);
+        window.removeEventListener("keydown", onKey);
+        gsap.killTweensOf(window);
+      });
+    }
+
     const afSteps = [...document.querySelectorAll(".af-step")];
 
-    const setActive = (i: number) => {
-      panels.forEach((p, n) => p.classList.toggle("active", n === i));
-      stages.forEach((s, n) => s.classList.toggle("active", n === i));
-      idxBtns.forEach((b, n) => b.classList.toggle("active", n === i));
-      const tint = ["#0a1324", "#0c1022", "#0a1622"][i];
-      gsap.to("#work", { "--work-bg": tint, duration: 0.6 });
-    };
-
-    panels.forEach((panel, i) => {
-      ScrollTrigger.create({
-        trigger: panel,
-        start: "top center",
-        end: "bottom center",
-        onToggle: (self) => {
-          if (self.isActive) setActive(i);
-        },
-      });
-    });
-
     ScrollTrigger.create({
-      trigger: '.proj-panel[data-panel="2"]',
-      start: "top center",
-      end: "bottom center",
-      scrub: true,
-      onUpdate: (self) => {
-        const lit = Math.round(self.progress * 5);
-        afSteps.forEach((s, n) => s.classList.toggle("lit", n < lit));
+      trigger: ".proj-grid",
+      start: "top 75%",
+      once: true,
+      onEnter: () => {
+        afSteps.forEach((s, n) => {
+          gsap.delayedCall(0.25 + n * 0.22, () => s.classList.add("lit"));
+        });
       },
     });
-
-    const jumpHandlers: Array<() => void> = [];
-    idxBtns.forEach((b) => {
-      const handler = () => {
-        const i = Number(b.dataset.jump);
-        panels[i]?.scrollIntoView({ behavior: "smooth", block: "center" });
-      };
-      b.addEventListener("click", handler);
-      jumpHandlers.push(() => b.removeEventListener("click", handler));
-    });
-    cleanups.push(...jumpHandlers);
 
     const log = document.querySelector<HTMLElement>(".log");
     const rocket = document.getElementById("logRocket");
@@ -358,7 +454,6 @@ export function initOrbital() {
     });
   } else {
     document.querySelectorAll(".af-step").forEach((s) => s.classList.add("lit"));
-    document.querySelectorAll(".proj-panel").forEach((p) => p.classList.add("active"));
     document.querySelector(".exp")?.classList.add("is-hot");
   }
 
