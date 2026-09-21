@@ -3,6 +3,27 @@
 import { useEffect } from "react";
 import { initOrbital } from "@/lib/orbital-runtime";
 
+const ORBIT = { cx: 750, cy: 450, rx: 720, ry: 250, rot: (-14 * Math.PI) / 180 };
+
+// Points sit on the outer orbit ellipse (same geometry as the satellite path).
+const ORBIT_POINTS = [
+  { id: "work", label: "WORK", deg: 240 },
+  { id: "experience", label: "EXPERIENCE", deg: 305 },
+  { id: "about", label: "ABOUT", deg: 60 },
+  { id: "systems", label: "SYSTEMS", deg: 100 },
+  { id: "contact", label: "CONTACT", deg: 130 },
+].map((p) => {
+  const a = (p.deg * Math.PI) / 180;
+  const ex = ORBIT.rx * Math.cos(a);
+  const ey = ORBIT.ry * Math.sin(a);
+  return {
+    ...p,
+    x: Number((ORBIT.cx + ex * Math.cos(ORBIT.rot) - ey * Math.sin(ORBIT.rot)).toFixed(1)),
+    y: Number((ORBIT.cy + ex * Math.sin(ORBIT.rot) + ey * Math.cos(ORBIT.rot)).toFixed(1)),
+    above: Math.sin(a) < 0,
+  };
+});
+
 export function OrbitalSite() {
   useEffect(() => initOrbital(), []);
 
@@ -15,8 +36,8 @@ export function OrbitalSite() {
       <div className="cursor" id="cursor" aria-hidden="true" />
 
       <nav className="nav" id="nav" aria-label="Primary">
-        <a className="nav__brand" href="#hero" aria-label="Hriday Adani, home">
-          <span className="nav__name">HRIDAY ADANI</span>
+        <a className="nav__brand" href="#hero" aria-label="HA, home">
+          <span className="nav__name">HA</span>
           <span className="nav__status">
             <span className="pulse" />
             SYSTEM ONLINE · 01 / PORTFOLIO
@@ -108,14 +129,51 @@ export function OrbitalSite() {
               <circle className="orbit-sat" id="sat" cx="0" cy="0" r="4" />
             </svg>
 
+            <div className="orbit-name" id="orbitName" aria-hidden="true">
+              <span>HRIDAY</span> <span>ADANI</span>
+            </div>
+
+            <svg
+              className="orbit-svg orbit-points"
+              viewBox="0 0 1500 900"
+              id="orbitPoints"
+              role="navigation"
+              aria-label="Site sections"
+            >
+              {ORBIT_POINTS.map((pt) => (
+                <g key={pt.id} transform={`translate(${pt.x} ${pt.y})`}>
+                  <g
+                    className="orbit-pt"
+                    data-go={pt.id}
+                    role="link"
+                    tabIndex={0}
+                    aria-label={pt.label}
+                  >
+                    <g className="pt-scale">
+                      <circle className="pt-hit" r="46" />
+                      <circle className="pt-halo" r="20" />
+                      <circle className="pt-dot" r="6" />
+                      <text className="pt-lab" y={pt.above ? -34 : 44}>
+                        {pt.label}
+                      </text>
+                    </g>
+                  </g>
+                </g>
+              ))}
+            </svg>
+
             <div className="hero__stage">
               <div className="wrap">
                 <div className="hero__tag hero__tag--stage reveal-up d1">
                   <span className="mono mono--accent">01 / SYSTEM ONLINE</span>
                 </div>
                 <h1 className="hero__name">
-                  <span className="reveal-up d2">HRIDAY</span>
-                  <span className="reveal-up d3">ADANI</span>
+                  <span className="reveal-up d2" data-w="HRIDAY">
+                    HRIDAY
+                  </span>
+                  <span className="reveal-up d3" data-w="ADANI">
+                    ADANI
+                  </span>
                 </h1>
                 <div className="hero__copy reveal-up d4">
                   <div className="hero__role">
@@ -129,9 +187,9 @@ export function OrbitalSite() {
                     I build intelligent systems, from research prototypes to production software.
                   </p>
                   <div className="hero__cta">
-                    <a className="btn btn--primary" href="#work">
-                      Explore work <span className="btn__arrow">↓</span>
-                    </a>
+                    <button type="button" className="btn btn--primary" id="enterOrbit">
+                      Enter the orbit <span className="btn__arrow">↓</span>
+                    </button>
                     <a
                       className="btn btn--ext"
                       href="/hriday-adani-resume.pdf"
@@ -150,17 +208,36 @@ export function OrbitalSite() {
                 <span className="mono mono--accent">Open to New Grad opportunities</span>
               </div>
             </div>
-
-            <div className="scroll-hint" aria-hidden="true">
-              <span className="bar" />
-              <span className="mono" style={{ fontSize: 10 }}>
-                Enter orbit
-              </span>
-            </div>
           </div>
         </section>
 
-        <section id="work" className="pad" aria-label="Selected work">
+        <section id="work" className="view pad" aria-label="Selected work">
+          <div className="work-bar" id="workBar" aria-hidden="true">
+            <div className="log__line" />
+            <div className="log__line-fill" id="workFill" />
+            <div className="log__rocket" id="workRocket">
+              <div className="log__rocket-inner">
+                <svg viewBox="0 0 24 44" fill="none">
+                  <path
+                    className="log__flame"
+                    d="M9 36c1.2 4 3 7 3 7s1.8-3 3-7c-1.4 1.2-4.6 1.2-6 0Z"
+                    fill="#5E8BFF"
+                  />
+                  <path
+                    d="M12 2.5 18 13v14.5c0 1.4-1.2 3.2-3.2 4.2L12 33.5l-2.8-1.8C7.2 30.7 6 28.9 6 27.5V13L12 2.5Z"
+                    fill="#0C111B"
+                    stroke="#8FD3E8"
+                    strokeWidth="1.2"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M9 13h6" stroke="#5E8BFF" strokeWidth="1" />
+                  <circle cx="12" cy="20" r="2.2" fill="#8FD3E8" />
+                  <path d="M6 16.5 3.5 21 6 25.5" stroke="#5E8BFF" strokeWidth="1.1" strokeLinejoin="round" />
+                  <path d="M18 16.5 20.5 21 18 25.5" stroke="#5E8BFF" strokeWidth="1.1" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </div>
+          </div>
           <div className="wrap">
             <div className="projects__head">
               <div>
@@ -169,7 +246,7 @@ export function OrbitalSite() {
                   <span className="dot" />
                   <span className="lab">Project Archive</span>
                 </div>
-                <h2 className="section-title">Selected Missions</h2>
+                <h2 className="section-title">Personal Missions</h2>
               </div>
             </div>
 
@@ -209,6 +286,11 @@ export function OrbitalSite() {
                 <div className="proj-mission">Mission 01</div>
                 <h3 className="proj-name">StorageKV</h3>
                 <div className="proj-sub">Embedded LSM-Tree Key-Value Storage Engine</div>
+                <div className="proj-links">
+                  <a className="proj-link" href="https://github.com/hriday1136/StorageKV" target="_blank" rel="noopener noreferrer">
+                    Open <span className="ar">↗</span>
+                  </a>
+                </div>
                 <p className="proj-desc">
                   A RocksDB/LevelDB-inspired key-value storage engine built from scratch in Rust with{" "}
                   <strong>zero runtime dependencies</strong>. It runs on an{" "}
@@ -299,6 +381,14 @@ export function OrbitalSite() {
                 <div className="proj-mission">Mission 02</div>
                 <h3 className="proj-name">ClauseWatch</h3>
                 <div className="proj-sub">AI-Powered Contract Intelligence SaaS</div>
+                <div className="proj-links">
+                  <a className="proj-link" href="https://github.com/hriday1136/ClauseWatch" target="_blank" rel="noopener noreferrer">
+                    Open GitHub <span className="ar">↗</span>
+                  </a>
+                  <a className="proj-link" href="https://clause-watch-tracker.vercel.app/" target="_blank" rel="noopener noreferrer">
+                    Open Website <span className="ar">↗</span>
+                  </a>
+                </div>
                 <p className="proj-desc">
                   A multi-tenant SaaS that turns raw contracts into structured, reviewable data. An{" "}
                   <strong>LLM extraction pipeline</strong> pulls fields from PDF and DOCX with{" "}
@@ -378,6 +468,11 @@ export function OrbitalSite() {
                 <div className="proj-mission">Mission 03</div>
                 <h3 className="proj-name">AccessForge</h3>
                 <div className="proj-sub">Accessibility Remediation Pipeline</div>
+                <div className="proj-links">
+                  <a className="proj-link" href="https://github.com/hriday1136/AccessForge" target="_blank" rel="noopener noreferrer">
+                    Open <span className="ar">↗</span>
+                  </a>
+                </div>
                 <p className="proj-desc">
                   An end-to-end pipeline that scans React apps, generates <strong>WCAG fixes</strong>,
                   verifies them independently, and opens GitHub pull requests. Orchestration runs on a{" "}
@@ -424,7 +519,7 @@ export function OrbitalSite() {
           </div>
         </section>
 
-        <section id="experience" className="pad" aria-label="Experience">
+        <section id="experience" className="view pad" aria-label="Experience">
           <div className="wrap">
             <div className="eyebrow r">
               <span className="num">03</span>
@@ -432,7 +527,7 @@ export function OrbitalSite() {
               <span className="lab">Experience</span>
             </div>
             <h2 className="section-title r" style={{ marginBottom: 70 }}>
-              Mission Log
+              Professional Missions
             </h2>
 
             <div className="log">
@@ -525,7 +620,7 @@ export function OrbitalSite() {
           </div>
         </section>
 
-        <section id="about" className="pad" aria-label="About">
+        <section id="about" className="view pad" aria-label="About">
           <div className="wrap">
             <div className="about-grid">
               <div className="about__copy r">
@@ -576,7 +671,7 @@ export function OrbitalSite() {
           </div>
         </section>
 
-        <section id="systems" className="pad" aria-label="Systems and tools">
+        <section id="systems" className="view pad" aria-label="Systems and tools">
           <div className="wrap">
             <div className="eyebrow r">
               <span className="num">05</span>
@@ -653,7 +748,7 @@ export function OrbitalSite() {
           </div>
         </section>
 
-        <section id="contact" aria-label="Contact">
+        <section id="contact" className="view" aria-label="Contact">
           <div className="deep-planet" aria-hidden="true" />
           <div className="wrap">
             <div className="contact__lead r">Next mission?</div>
@@ -697,7 +792,6 @@ export function OrbitalSite() {
             </div>
 
             <div className="contact__foot">
-              <div className="contact__name">HRIDAY ADANI</div>
               <div className="contact__note">
                 Software Engineer · AI Systems · Research · Rutgers 2027
               </div>
@@ -705,6 +799,10 @@ export function OrbitalSite() {
           </div>
         </section>
       </main>
+
+      <button type="button" className="btn view-back" id="viewBack">
+        ← Back to orbit
+      </button>
     </>
   );
 }

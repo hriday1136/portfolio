@@ -2,7 +2,6 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
 export function initOrbital() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -24,7 +23,7 @@ export function initOrbital() {
   let W = 0;
   let H = 0;
   let dpr = Math.min(window.devicePixelRatio || 1, 2);
-  let scrollY = window.scrollY;
+  const scrollY = 0;
   let rafStars = 0;
 
   function sizeCanvas() {
@@ -80,6 +79,7 @@ export function initOrbital() {
   }
 
   const nav = document.getElementById("nav");
+
   const links = [...document.querySelectorAll<HTMLAnchorElement>(".nav__links a[data-sec]")];
   const navLinks = document.getElementById("navLinks");
   const navToggle = document.getElementById("navToggle");
@@ -102,71 +102,7 @@ export function initOrbital() {
   navToggle?.addEventListener("click", onToggle);
   cleanups.push(() => navToggle?.removeEventListener("click", onToggle));
 
-  const onNavClick = (e: Event) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName === "A") closeMenu();
-  };
-  navLinks?.addEventListener("click", onNavClick);
-  cleanups.push(() => navLinks?.removeEventListener("click", onNavClick));
-
-  const onWorkLink = (e: Event) => {
-    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href="#work"]');
-    if (!a || !document.documentElement.classList.contains("gsap-active")) return;
-    e.preventDefault();
-    window.scrollTo({ top: planetEntryLen(), behavior: "smooth" });
-    history.replaceState(null, "", "#work");
-  };
-  document.addEventListener("click", onWorkLink);
-  cleanups.push(() => document.removeEventListener("click", onWorkLink));
-
-  const brand = document.querySelector<HTMLAnchorElement>(".nav__brand");
-  const goHome = (e: Event) => {
-    e.preventDefault();
-    closeMenu();
-    links.forEach((l) => l.classList.remove("active"));
-    window.scrollTo({ top: 0, behavior: "auto" });
-    history.replaceState(null, "", "#hero");
-  };
-  brand?.addEventListener("click", goHome);
-  cleanups.push(() => brand?.removeEventListener("click", goHome));
-
-  const heroPin = document.getElementById("hero-pin");
-  // scroll distance (in hero heights) for the dive into the planet
-  const ENTRY = 2.2;
-  const HOLD = 0;
-  const planetEntryLen = () => (heroPin ? heroPin.offsetHeight * ENTRY : 0);
-  const planetPinLen = () => (heroPin ? heroPin.offsetHeight * (ENTRY + HOLD) : 0);
-  const inPlanetEntry = () =>
-    document.documentElement.classList.contains("gsap-active") &&
-    window.scrollY < planetEntryLen() * 0.85;
-
-  const onScroll = () => {
-    scrollY = window.scrollY;
-    nav?.classList.toggle("scrolled", scrollY > 40);
-    if (inPlanetEntry()) links.forEach((l) => l.classList.remove("active"));
-  };
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-  cleanups.push(() => window.removeEventListener("scroll", onScroll));
-
-  const secs = ["work", "experience", "about", "systems", "contact"]
-    .map((id) => document.getElementById(id))
-    .filter((el): el is HTMLElement => Boolean(el));
-  const spy = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) {
-          if (en.target.id === "work" && inPlanetEntry()) return;
-          links.forEach((l) =>
-            l.classList.toggle("active", l.dataset.sec === en.target.id),
-          );
-        }
-      });
-    },
-    { rootMargin: "-45% 0px -50% 0px" },
-  );
-  secs.forEach((s) => spy.observe(s));
-  cleanups.push(() => spy.disconnect());
+  const dur = (n: number) => (reduce ? 0.001 : n);
 
   const revs = [...document.querySelectorAll(".r")];
   const revObs = new IntersectionObserver(
@@ -223,11 +159,14 @@ export function initOrbital() {
   if (matchMedia("(pointer:fine)").matches && !reduce) {
     const orbitBack = document.getElementById("orbitBack");
     const orbitFront = document.getElementById("orbitFront");
+    const orbitPoints = document.getElementById("orbitPoints");
     const onParallax = (e: MouseEvent) => {
       const dx = e.clientX / innerWidth - 0.5;
       const dy = e.clientY / innerHeight - 0.5;
       if (orbitBack)
         orbitBack.style.transform = `translate(-50%,-52%) translate(${dx * 14}px,${dy * 10}px)`;
+      if (orbitPoints)
+        orbitPoints.style.transform = `translate(-50%,-52%) translate(${dx * 14}px,${dy * 10}px)`;
       if (orbitFront)
         orbitFront.style.transform = `translate(-50%,-52%) translate(${dx * 22}px,${dy * 16}px)`;
     };
@@ -261,201 +200,464 @@ export function initOrbital() {
     cleanups.push(() => cancelAnimationFrame(satRaf));
   }
 
-  if (!reduce) {
-    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-    const desktop = window.matchMedia("(min-width: 901px)").matches;
-    if (desktop) document.documentElement.classList.add("gsap-active");
 
-    let heroTl: gsap.core.Timeline | null = null;
-    if (desktop) {
-      gsap.set("#planet", { xPercent: -50, transformOrigin: "50% 50%" });
-      // The hero is pinned while the camera "enters" the planet; the projects
-      // section (held at the top of the viewport) emerges out of it.
-      heroTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: "#hero-pin",
-          start: "top top",
-          end: () => "+=" + planetPinLen(),
-          scrub: 0.6,
-          pin: "#hero-pin",
-          pinSpacing: true,
-          anticipatePin: 1,
-        },
-      });
-      heroTl
-        .to(".hero__name", { yPercent: -28, ease: "none", duration: 0.3 }, 0)
-        .to(".hero__name", { opacity: 0, ease: "none", duration: 0.25 }, 0.3)
-        .to(".hero__copy", { opacity: 0, y: -40, ease: "none", duration: 0.3 }, 0)
-        .to(".hero__top,.hero__foot,.scroll-hint", { opacity: 0, ease: "none", duration: 0.3 }, 0)
-        .to("#planet", { scale: 1.28, yPercent: -10, ease: "none", duration: 0.3 }, 0)
-        .to("#planet", { scale: 3.2, ease: "power2.in", duration: 0.55 }, 0.3)
-        .to(".planet-depth", { opacity: 1, ease: "none", duration: 0.3 }, 0.3)
-        .set("#planet", { autoAlpha: 0 }, 0.6)
-        .to(".planet-glow", { opacity: 1.4, ease: "none", duration: 0.3 }, 0)
-        .to(".planet-glow", { opacity: 0, ease: "none", duration: 0.3 }, 0.55)
-        .to(".orbit-back,.orbit-front", { opacity: 0, scale: 1.12, ease: "none", duration: 0.3 }, 0)
-        .fromTo(
-          "#work",
-          { opacity: 0, scale: 0.6, transformOrigin: "50% 45vh" },
-          { opacity: 1, scale: 1, ease: "power2.out", duration: 0.4 },
-          0.6,
-        )
-        .to({}, { duration: (1 * HOLD) / ENTRY }, 1);
+  // ---------------------------------------------------------------
+  // Orbit navigation: hero -> orbit (points) -> dive into the planet -> section
+  // ---------------------------------------------------------------
+  gsap.registerPlugin(ScrollTrigger);
+  const SECTION_IDS = ["work", "experience", "about", "systems", "contact"];
+  const viewEls = SECTION_IDS.map((id) => document.getElementById(id)).filter(
+    (el): el is HTMLElement => Boolean(el),
+  );
+  const viewBack = document.getElementById("viewBack");
+  const enterBtn = document.getElementById("enterOrbit");
+  const points = [...document.querySelectorAll<SVGGElement>(".orbit-pt")];
+  const afSteps = [...document.querySelectorAll(".af-step")];
 
-      // Hold the projects section still at the top of the viewport for the
-      // whole pin (it sits one screen above its natural position).
-      const workEl = document.getElementById("work");
-      gsap.fromTo(
-        "#work",
-        { y: () => -planetPinLen() },
-        {
-          y: 0,
-          ease: "none",
-          scrollTrigger: {
-            start: 0,
-            end: () => planetPinLen(),
-            scrub: true,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              if (workEl) workEl.style.pointerEvents =
-                  self.progress * planetPinLen() > planetEntryLen() * 0.85 ? "auto" : "none";
-            },
-          },
-        },
-      );
-    }
+  let mode = "hero"; // "hero" | "orbit" | a section id
+  let busy = false;
+  let rocketSync: ((fromStart: boolean) => void) | null = null;
+  let workSync: ((fromStart: boolean) => void) | null = null;
 
-    if (desktop) {
-      // Scroll gate: the projects section is a stop. One gesture always lands
-      // on it (from above or below); a second, separate gesture moves on.
-      let animating = false;
-      let locked = false;
-      let lastInput = 0;
+  gsap.set("#planet", { xPercent: -50, transformOrigin: "50% 50%" });
+  gsap.set([...viewEls, viewBack], { autoAlpha: 0 });
+  gsap.set(points, { autoAlpha: 0 });
+  gsap.set("#orbitName", { autoAlpha: 0 });
 
-      const goTo = (top: number, duration: number) => {
-        animating = true;
-        gsap.to(window, {
-          scrollTo: { y: top, autoKill: false },
-          duration,
-          ease: "power2.inOut",
-          overwrite: true,
-          onComplete: () => {
-            animating = false;
-            locked = true;
-            lastInput = performance.now();
-          },
-        });
-      };
+  // The landing-page name travels into the orbit: each word flies to its place in
+  // the outlined name at the centre of the orbit, then the two cross-fade.
+  const heroWords = [...document.querySelectorAll<HTMLElement>(".hero__name span")];
+  const orbitWords = [...document.querySelectorAll<HTMLElement>("#orbitName span")];
+  const wordMove = (i: number) => {
+    const from = heroWords[i];
+    const to = orbitWords[i];
+    if (!from || !to) return { x: 0, y: 0, scale: 1, origin: "50% 50%" };
+    const range = document.createRange();
+    range.selectNodeContents(from);
+    const text = range.getBoundingClientRect();
+    const box = from.getBoundingClientRect();
+    const target = to.getBoundingClientRect();
+    return {
+      x: target.left + target.width / 2 - (text.left + text.width / 2),
+      y: target.top + target.height / 2 - (text.top + text.height / 2),
+      scale: to.offsetWidth / text.width,
+      origin: `${text.left + text.width / 2 - box.left}px ${text.top + text.height / 2 - box.top}px`,
+    };
+  };
 
-      const intent = (dir: number, step: number, e: Event) => {
-        const now = performance.now();
-        const gap = now - lastInput;
-        lastInput = now;
-        if (animating) {
-          e.preventDefault();
-          return;
-        }
-        if (locked) {
-          if (gap > 120) locked = false;
-          else {
-            e.preventDefault();
-            return;
-          }
-        }
-        const gate = planetEntryLen();
-        const y = window.scrollY;
-        if (dir > 0 && y < gate - 2) {
-          e.preventDefault();
-          goTo(gate, Math.min(2.4, Math.max(0.8, (gate - y) / 1000)));
-        } else if (dir < 0 && y > gate + 2 && y - step <= gate) {
-          e.preventDefault();
-          goTo(gate, Math.min(1.2, Math.max(0.5, (y - gate) / 1000)));
-        }
-      };
-
-      const onWheel = (e: WheelEvent) => {
-        if (e.ctrlKey || !e.deltaY) return;
-        intent(Math.sign(e.deltaY), Math.abs(e.deltaY), e);
-      };
-      const onKey = (e: KeyboardEvent) => {
-        const t = e.target as HTMLElement;
-        if (e.altKey || e.ctrlKey || e.metaKey || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-        const page = window.innerHeight * 0.9;
-        if (e.key === "ArrowDown") intent(1, 40, e);
-        else if (e.key === "PageDown" || (e.key === " " && !e.shiftKey)) intent(1, page, e);
-        else if (e.key === "ArrowUp") intent(-1, 40, e);
-        else if (e.key === "PageUp" || (e.key === " " && e.shiftKey)) intent(-1, page, e);
-      };
-      window.addEventListener("wheel", onWheel, { passive: false });
-      window.addEventListener("keydown", onKey);
-      cleanups.push(() => {
-        window.removeEventListener("wheel", onWheel);
-        window.removeEventListener("keydown", onKey);
-        gsap.killTweensOf(window);
-      });
-    }
-
-    const afSteps = [...document.querySelectorAll(".af-step")];
-
-    ScrollTrigger.create({
-      trigger: ".proj-grid",
-      start: "top 75%",
-      once: true,
-      onEnter: () => {
-        afSteps.forEach((s, n) => {
-          gsap.delayedCall(0.25 + n * 0.22, () => s.classList.add("lit"));
-        });
+  const toOrbit = gsap
+    .timeline({ paused: true })
+    .to(
+      heroWords,
+      {
+        x: (i: number) => wordMove(i).x,
+        y: (i: number) => wordMove(i).y,
+        scale: (i: number) => wordMove(i).scale,
+        transformOrigin: (i: number) => wordMove(i).origin,
+        rotation: -14,
+        ease: "power2.inOut",
+        duration: 1.1,
       },
+      0,
+    )
+    .to(heroWords, { opacity: 0, ease: "none", duration: 0.35 }, 0.75)
+    .set(".hero__name", { autoAlpha: 0 }, 1.1)
+    .to(".hero__copy", { y: -40, autoAlpha: 0, ease: "power2.inOut", duration: 0.9 }, 0)
+    .to(".hero__top,.hero__foot,.hero__tag--stage", { autoAlpha: 0, ease: "none", duration: 0.7 }, 0)
+    .to("#planet", { scale: 1.28, yPercent: -10, ease: "power2.inOut", duration: 1.1 }, 0)
+    .to(".planet-glow", { opacity: 1.4, ease: "none", duration: 1.1 }, 0)
+    .to("#orbitName", { autoAlpha: 1, ease: "none", duration: 0.35 }, 0.75)
+    .to(points, { autoAlpha: 1, ease: "power1.out", duration: 0.6, stagger: 0.12 }, 0.7);
+
+  const dive = gsap
+    .timeline({ paused: true })
+    .to("#planet", { scale: 3.2, ease: "power2.in", duration: 1.3 }, 0)
+    .to(".planet-depth", { opacity: 1, ease: "none", duration: 0.8 }, 0.5)
+    .to(".orbit-back,.orbit-front,.orbit-points,#orbitName", { autoAlpha: 0, ease: "none", duration: 0.6 }, 0.1)
+    .to(".planet-glow", { opacity: 0, ease: "none", duration: 0.6 }, 0.6)
+    .set("#planet", { autoAlpha: 0 }, 1.3);
+
+  if (reduce) {
+    toOrbit.timeScale(60);
+    dive.timeScale(60);
+  }
+
+  const run = (tl: gsap.core.Timeline, reverse = false) =>
+    new Promise<void>((resolve) => {
+      const evt = reverse ? "onReverseComplete" : "onComplete";
+      tl.eventCallback(evt, () => {
+        tl.eventCallback(evt, null);
+        resolve();
+      });
+      if (reverse) tl.reverse();
+      else tl.play();
     });
 
-    const log = document.querySelector<HTMLElement>(".log");
-    const rocket = document.getElementById("logRocket");
-    const fill = document.getElementById("logFill");
-    const missions = [...document.querySelectorAll<HTMLElement>(".exp")];
+  const tween = (vars: gsap.TweenVars, target: gsap.TweenTarget) =>
+    new Promise<void>((resolve) => {
+      gsap.to(target, { ...vars, onComplete: () => resolve() });
+    });
 
-    if (log && rocket && fill && missions.length) {
-      const nodeOffset = (el: HTMLElement) => el.offsetTop + 10;
-      const markHot = (progress: number) => {
-        const idx = Math.round(progress * (missions.length - 1));
-        missions.forEach((m, n) => m.classList.toggle("is-hot", n === idx));
-      };
-      markHot(0);
-      fill.style.height = `${nodeOffset(missions[0]) + 8}px`;
-      gsap.fromTo(
-        rocket,
-        { y: () => nodeOffset(missions[0]) - 8 },
-        {
-          y: () => nodeOffset(missions[missions.length - 1]) - 8,
-          ease: "none",
-          scrollTrigger: {
-            trigger: log,
-            start: "top 55%",
-            end: "bottom 50%",
-            scrub: 0.85,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              const y = Number(gsap.getProperty(rocket, "y"));
-              fill.style.height = `${Math.max(18, y + 16)}px`;
-              markHot(self.progress);
-            },
-          },
-        },
-      );
-    }
+  const setActiveLink = (id: string | null) =>
+    links.forEach((l) => l.classList.toggle("active", l.dataset.sec === id));
 
+  const showView = async (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollTop = 0;
+    el.querySelectorAll(".r").forEach((r) => {
+      r.classList.remove("in");
+      revObs.observe(r);
+    });
+    nav?.classList.add("scrolled", "in-view");
+    setActiveLink(id);
+    gsap.set(el, { transformOrigin: "50% 45vh", scale: 0.6 });
+    await tween({ autoAlpha: 1, scale: 1, duration: dur(0.9), ease: "power2.out", clearProps: "transform,transformOrigin" }, el);
     ScrollTrigger.refresh();
-    const onLoad = () => ScrollTrigger.refresh();
-    window.addEventListener("load", onLoad);
-    cleanups.push(() => {
-      window.removeEventListener("load", onLoad);
-      document.documentElement.classList.remove("gsap-active");
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-      heroTl?.kill();
+    if (id === "experience") rocketSync?.(true);
+    if (id === "work") workSync?.(true);
+    gsap.to(viewBack, { autoAlpha: 1, duration: dur(0.4) });
+    if (id === "work") {
+      afSteps.forEach((s, n) => {
+        gsap.delayedCall(dur(0.25 + n * 0.22), () => s.classList.add("lit"));
+      });
+    }
+  };
+
+  const hideView = async (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    gsap.set(el, { transformOrigin: "50% 45vh" });
+    gsap.to(viewBack, { autoAlpha: 0, duration: dur(0.3) });
+    await tween({ autoAlpha: 0, scale: 0.6, duration: dur(0.6), ease: "power2.in" }, el);
+    gsap.set(el, { clearProps: "transform,transformOrigin" });
+    afSteps.forEach((s) => s.classList.remove("lit"));
+  };
+
+  const freezeHeroTransitions = () => {
+    document.querySelectorAll<HTMLElement>(".hero .reveal-up").forEach((el) => {
+      el.style.transition = "none";
     });
-  } else {
-    document.querySelectorAll(".af-step").forEach((s) => s.classList.add("lit"));
+  };
+
+  const enterOrbit = async () => {
+    if (busy || mode !== "hero") return;
+    busy = true;
+    freezeHeroTransitions();
+    toOrbit.invalidate();
+    await run(toOrbit);
+    mode = "orbit";
+    busy = false;
+  };
+
+  const goSection = async (id: string) => {
+    if (busy || mode === id) return;
+    busy = true;
+    closeMenu();
+    if (mode === "hero") {
+      freezeHeroTransitions();
+      toOrbit.invalidate();
+      toOrbit.timeScale(reduce ? 60 : 1.8);
+      await run(toOrbit);
+      toOrbit.timeScale(reduce ? 60 : 1);
+      mode = "orbit";
+    }
+    if (mode === "orbit") {
+      await run(dive);
+    } else {
+      await hideView(mode);
+    }
+    mode = id;
+    await showView(id);
+    busy = false;
+  };
+
+  const backToOrbit = async () => {
+    if (busy || mode === "hero" || mode === "orbit") return;
+    busy = true;
+    nav?.classList.remove("in-view");
+    setActiveLink(null);
+    closeMenu();
+    await hideView(mode);
+    nav?.classList.remove("scrolled");
+    await run(dive, true);
+    mode = "orbit";
+    busy = false;
+  };
+
+  const backToHero = async () => {
+    if (busy || mode !== "orbit") return;
+    busy = true;
+    await run(toOrbit, true);
+    mode = "hero";
+    busy = false;
+  };
+
+  const goHome = async () => {
+    if (mode === "hero" || busy) return;
+    if (mode !== "orbit") await backToOrbit();
+    await backToHero();
+  };
+
+  const onEnter = () => void enterOrbit();
+  enterBtn?.addEventListener("click", onEnter);
+  cleanups.push(() => enterBtn?.removeEventListener("click", onEnter));
+
+  const pointHandlers = points.map((pt) => {
+    const id = pt.dataset.go ?? "";
+    const click = () => {
+      if (mode === "orbit") void goSection(id);
+    };
+    const key = (e: KeyboardEvent) => {
+      if (mode === "orbit" && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        void goSection(id);
+      }
+    };
+    pt.addEventListener("click", click);
+    pt.addEventListener("keydown", key);
+    return () => {
+      pt.removeEventListener("click", click);
+      pt.removeEventListener("keydown", key);
+    };
+  });
+  cleanups.push(...pointHandlers);
+
+  const onNavLink = (e: Event) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-sec]");
+    if (!a) return;
+    e.preventDefault();
+    closeMenu();
+    void goSection(a.dataset.sec ?? "");
+  };
+  navLinks?.addEventListener("click", onNavLink);
+  cleanups.push(() => navLinks?.removeEventListener("click", onNavLink));
+
+  const brand = document.querySelector<HTMLAnchorElement>(".nav__brand");
+  const onBrand = (e: Event) => {
+    e.preventDefault();
+    void goHome();
+  };
+  brand?.addEventListener("click", onBrand);
+  cleanups.push(() => brand?.removeEventListener("click", onBrand));
+
+  const onBackBtn = () => void backToOrbit();
+  viewBack?.addEventListener("click", onBackBtn);
+  cleanups.push(() => viewBack?.removeEventListener("click", onBackBtn));
+
+  const onEsc = (e: KeyboardEvent) => {
+    if (e.key !== "Escape") return;
+    if (mode === "orbit") void backToHero();
+    else if (mode !== "hero") void backToOrbit();
+  };
+  window.addEventListener("keydown", onEsc);
+  cleanups.push(() => window.removeEventListener("keydown", onEsc));
+
+  // Experience: the rocket follows the view's own scroll
+  const expView = document.getElementById("experience");
+  const log = document.querySelector<HTMLElement>(".log");
+  const rocket = document.getElementById("logRocket");
+  const fill = document.getElementById("logFill");
+  const missions = [...document.querySelectorAll<HTMLElement>(".exp")];
+
+  if (!reduce && expView && log && rocket && fill && missions.length) {
+    const nodeOffset = (el: HTMLElement) => el.offsetTop + 10;
+    const line = log.querySelector<HTMLElement>(".log__line");
+    const markHot = (progress: number) => {
+      const idx = Math.round(progress * (missions.length - 1));
+      missions.forEach((m, n) => m.classList.toggle("is-hot", n === idx));
+    };
+    // The rocket's position is the view's own scroll position (0 = top, 1 = bottom),
+    // so it reaches the last point exactly when the bottom of the page is reached.
+    const pos = { v: 0 };
+    const apply = () => {
+      const y0 = nodeOffset(missions[0]) - 8;
+      const y1 = nodeOffset(missions[missions.length - 1]) - 8;
+      const y = y0 + (y1 - y0) * pos.v;
+      const end = nodeOffset(missions[missions.length - 1]);
+      // the line stops at the final point
+      if (line) {
+        line.style.bottom = "auto";
+        line.style.height = `${end}px`;
+      }
+      gsap.set(rocket, { y });
+      fill.style.height = `${Math.min(end, Math.max(18, y + 16))}px`;
+      markHot(pos.v);
+    };
+    const target = () => {
+      const max = expView.scrollHeight - expView.clientHeight;
+      // everything fits on screen: both points are in view, so the rocket goes to the end
+      return max > 4 ? Math.min(1, Math.max(0, expView.scrollTop / max)) : 1;
+    };
+    const follow = (duration: number, delay = 0) =>
+      gsap.to(pos, { v: target(), duration, delay, ease: "power2.out", overwrite: true, onUpdate: apply });
+    apply();
+    const onExpScroll = () => {
+      follow(0.35);
+    };
+    expView.addEventListener("scroll", onExpScroll, { passive: true });
+    const onResize = () => follow(0.01);
+    window.addEventListener("resize", onResize);
+    rocketSync = (fromStart) => {
+      if (fromStart) {
+        gsap.killTweensOf(pos);
+        pos.v = 0;
+        apply();
+        follow(1.2, 0.4);
+      } else follow(0.01);
+    };
+    cleanups.push(() => {
+      expView.removeEventListener("scroll", onExpScroll);
+      window.removeEventListener("resize", onResize);
+      gsap.killTweensOf(pos);
+      rocketSync = null;
+    });
+  } else if (reduce) {
     document.querySelector(".exp")?.classList.add("is-hot");
   }
+
+  // Personal Missions: a continuous rocket bar that follows the view's scroll
+  const workView = document.getElementById("work");
+  const workBar = document.getElementById("workBar");
+  const workRocket = document.getElementById("workRocket");
+  const workFill = document.getElementById("workFill");
+
+  if (!reduce && workView && workBar && workRocket && workFill) {
+    const wpos = { v: 0 };
+    const wapply = () => {
+      const y = Math.max(0, workBar.clientHeight - 40) * wpos.v;
+      gsap.set(workRocket, { y });
+      workFill.style.height = `${Math.max(18, y + 16)}px`;
+    };
+    const wtarget = () => {
+      const max = workView.scrollHeight - workView.clientHeight;
+      return max > 4 ? Math.min(1, Math.max(0, workView.scrollTop / max)) : 1;
+    };
+    const wfollow = (duration: number, delay = 0) =>
+      gsap.to(wpos, { v: wtarget(), duration, delay, ease: "power2.out", overwrite: true, onUpdate: wapply });
+    wapply();
+    const onWorkScroll = () => {
+      wfollow(0.35);
+    };
+    workView.addEventListener("scroll", onWorkScroll, { passive: true });
+    const onWorkResize = () => wfollow(0.01);
+    window.addEventListener("resize", onWorkResize);
+    workSync = (fromStart) => {
+      if (fromStart) {
+        gsap.killTweensOf(wpos);
+        wpos.v = 0;
+        wapply();
+        wfollow(1.2, 0.4);
+      } else wfollow(0.01);
+    };
+    cleanups.push(() => {
+      workView.removeEventListener("scroll", onWorkScroll);
+      window.removeEventListener("resize", onWorkResize);
+      gsap.killTweensOf(wpos);
+      workSync = null;
+    });
+  }
+
+  if (reduce) afSteps.forEach((s) => s.classList.add("lit"));
+
+  // Landing-page name: the letters near the cursor light up like a scanner sweeping over them
+  const nameEl = document.querySelector<HTMLElement>(".hero__name");
+  if (nameEl && matchMedia("(pointer:fine)").matches && !reduce) {
+    let tx = 0;
+    let ty = 0;
+    let cx = 0;
+    let cy = 0;
+    let target = 0;
+    let level = 0;
+    let running = false;
+    let raf = 0;
+
+    const frame = () => {
+      level += (target - level) * 0.12;
+      cx += (tx - cx) * 0.2;
+      cy += (ty - cy) * 0.2;
+      heroWords.forEach((w) => {
+        const b = w.getBoundingClientRect();
+        w.style.setProperty("--mx", `${cx - b.left}px`);
+        w.style.setProperty("--my", `${cy - b.top}px`);
+        w.style.setProperty("--r", `${90 + 50 * level}px`);
+        w.style.setProperty("--lv", level.toFixed(3));
+      });
+      if (target === 0 && level < 0.003) {
+        heroWords.forEach((w) => w.style.setProperty("--lv", "0"));
+        running = false;
+        return;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const start = () => {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(frame);
+    };
+    const onMove = (e: PointerEvent) => {
+      if (mode !== "hero") return;
+      if (target === 0) {
+        cx = e.clientX;
+        cy = e.clientY;
+      }
+      tx = e.clientX;
+      ty = e.clientY;
+      target = 1;
+      start();
+    };
+    const onLeave = () => {
+      target = 0;
+      start();
+    };
+    nameEl.addEventListener("pointermove", onMove);
+    nameEl.addEventListener("pointerleave", onLeave);
+    const stopWhenLeaving = window.setInterval(() => {
+      if (mode !== "hero" && target === 1) onLeave();
+    }, 200);
+    cleanups.push(() => {
+      nameEl.removeEventListener("pointermove", onMove);
+      nameEl.removeEventListener("pointerleave", onLeave);
+      window.clearInterval(stopWhenLeaving);
+      cancelAnimationFrame(raf);
+      heroWords.forEach((w) => {
+        ["--mx", "--my", "--r", "--lv"].forEach((v) => w.style.removeProperty(v));
+      });
+    });
+  }
+
+  cleanups.push(() => {
+    toOrbit.kill();
+    dive.kill();
+    ScrollTrigger.getAll().forEach((t) => t.kill());
+    gsap.killTweensOf([...viewEls, viewBack, ".hero__name", ".hero__copy", "#planet"]);
+    gsap.set(
+      [
+        ".hero__name",
+        ...heroWords,
+        ".hero__copy",
+        ".hero__top",
+        ".hero__foot",
+        ".hero__tag--stage",
+        "#planet",
+        ".planet-glow",
+        ".planet-depth",
+        ".orbit-back",
+        ".orbit-front",
+        ".orbit-points",
+        "#orbitName",
+        "#logRocket",
+        "#workRocket",
+        ...points,
+        ...viewEls,
+        viewBack,
+      ],
+      { clearProps: "all" },
+    );
+    document.querySelectorAll<HTMLElement>(".hero .reveal-up").forEach((el) => {
+      el.style.transition = "";
+    });
+  });
 
   return () => {
     cleanups.forEach((fn) => fn());
