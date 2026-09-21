@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hriday Adani — Software Engineer</title>
+<meta name="description" content="Portfolio of Hriday Adani, a Rutgers Computer Science and Economics student building AI systems, developer tools, and scientific software." />
+<meta property="og:title" content="Hriday Adani — Software Engineer" />
+<meta property="og:description" content="AI systems, developer tools, and scientific software. Rutgers CS + Economics, graduating May 2027." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ORBITAL SYSTEM — Hriday Adani
+   Tokens
+   ============================================================ */
+:root{
+  --bg:#05070D;
+  --surface:#0C111B;
+  --surface-2:#111826;
+  --text:#F4F6F8;
+  --muted:#8993A4;
+  --faint:#4B5567;
+  --accent:#5E8BFF;
+  --accent-dim:#3a5bb0;
+  --cyan:#8FD3E8;
+  --cyan-dim:#5f9db2;
+  --line:rgba(137,147,164,0.16);
+  --line-strong:rgba(137,147,164,0.30);
+
+  --font-display:"Space Grotesk", system-ui, sans-serif;
+  --font-body:"Inter", system-ui, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, monospace;
+
+  --maxw:1360px;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+html.gsap-active{scroll-behavior:auto;} /* let ScrollTrigger own scroll when active */
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:clip;
+}
+::selection{background:rgba(94,139,255,0.30);color:#fff;}
+
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:-0.02em;line-height:0.98;}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,64px);}
+
+/* ---- shared type utilities ---- */
+.mono{font-family:var(--font-mono);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+.mono--accent{color:var(--cyan);}
+.eyebrow{display:flex;align-items:center;gap:14px;margin-bottom:34px;}
+.eyebrow .num{font-family:var(--font-mono);font-size:12px;letter-spacing:0.2em;color:var(--accent);}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+.eyebrow .lab{font-family:var(--font-mono);font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:var(--muted);}
+.section-title{font-size:clamp(2.4rem,6vw,5.2rem);}
+
+/* ============================================================
+   Fixed layers: grain, stars, vignette
+   ============================================================ */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.atmos{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(120% 80% at 50% 120%, rgba(94,139,255,0.10), transparent 55%),
+    radial-gradient(90% 60% at 80% -10%, rgba(143,211,232,0.05), transparent 60%);
+}
+.grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  box-shadow:inset 0 0 240px 40px rgba(0,0,0,0.7);}
+
+main{position:relative;z-index:2;}
+
+/* ============================================================
+   Navigation — system status bar
+   ============================================================ */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px clamp(20px,5vw,64px);
+  transition:background .4s var(--ease), border-color .4s var(--ease), backdrop-filter .4s;
+  border-bottom:1px solid transparent;}
+.nav.scrolled{background:rgba(5,7,13,0.72);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+.nav__brand{display:flex;flex-direction:column;gap:2px;}
+.nav__name{font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:0.02em;}
+.nav__status{font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;color:var(--muted);display:flex;align-items:center;gap:7px;}
+.nav__status .pulse{width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 2.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.nav__links{display:flex;gap:clamp(14px,2.4vw,34px);align-items:center;}
+.nav__links a{font-family:var(--font-mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);position:relative;padding:6px 0;transition:color .3s;}
+.nav__links a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:0;background:var(--accent);transition:width .35s var(--ease);}
+.nav__links a:hover,.nav__links a.active{color:var(--text);}
+.nav__links a.active::after,.nav__links a:hover::after{width:100%;}
+.nav__toggle{display:none;background:none;border:1px solid var(--line-strong);color:var(--text);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;padding:8px 14px;cursor:pointer;text-transform:uppercase;}
+
+/* cursor ring (desktop) */
+.cursor{position:fixed;top:0;left:0;width:26px;height:26px;border:1px solid var(--cyan-dim);border-radius:50%;
+  transform:translate(-50%,-50%);pointer-events:none;z-index:70;transition:width .25s,height .25s,border-color .25s,opacity .25s;mix-blend-mode:screen;opacity:0;}
+.cursor.on{opacity:.9;}
+.cursor.grow{width:54px;height:54px;border-color:var(--accent);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+#hero-pin{position:relative;height:100vh;overflow:hidden;}
+.hero{position:absolute;inset:0;display:flex;flex-direction:column;}
+
+.hero__top{position:absolute;top:96px;left:0;right:0;z-index:6;}
+.hero__top .wrap{display:flex;justify-content:space-between;align-items:flex-start;}
+.hero__tag{display:flex;align-items:center;gap:10px;}
+
+/* planet — rising horizon at the bottom */
+.planet{position:absolute;left:50%;bottom:-66vw;width:150vw;height:150vw;transform:translateX(-50%);
+  border-radius:50%;z-index:2;will-change:transform;
+  background:
+    radial-gradient(60% 60% at 42% 30%, #26436f 0%, #15243d 34%, #0a1122 62%, #060a14 100%);
+  box-shadow:
+    inset 0 6vw 14vw -4vw rgba(143,211,232,0.28),
+    inset 0 -8vw 20vw 0 rgba(0,0,0,0.9),
+    0 -1px 0 0 rgba(143,211,232,0.35);
+}
+.planet::before{ /* atmosphere rim */
+  content:"";position:absolute;inset:-2.4vw;border-radius:50%;
+  background:radial-gradient(closest-side, transparent 84%, rgba(94,139,255,0.28) 92%, transparent 100%);
+  filter:blur(2px);
+}
+.planet::after{ /* surface banding / terminator */
+  content:"";position:absolute;inset:0;border-radius:50%;opacity:.5;
+  background:
+    radial-gradient(120% 90% at 30% 12%, rgba(143,211,232,0.10), transparent 40%),
+    repeating-radial-gradient(circle at 42% 30%, rgba(255,255,255,0.015) 0 3px, transparent 3px 26px);
+  mask:radial-gradient(60% 60% at 42% 30%, #000 40%, transparent 78%);
+}
+.planet-glow{position:absolute;left:50%;bottom:-4vh;width:120vw;height:40vh;transform:translateX(-50%);z-index:1;
+  background:radial-gradient(60% 100% at 50% 100%, rgba(94,139,255,0.22), transparent 70%);pointer-events:none;}
+
+/* orbit SVG layers for the depth motif */
+.orbit-svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);width:min(1500px,150vw);height:auto;pointer-events:none;}
+.orbit-back{z-index:3;}
+.orbit-front{z-index:5;}
+.orbit-path{fill:none;stroke:rgba(137,147,164,0.30);stroke-width:1;}
+.orbit-path--accent{stroke:rgba(143,211,232,0.5);}
+.orbit-sat{fill:var(--cyan);}
+.orbit-sat-glow{fill:var(--cyan);opacity:.35;}
+
+/* name block */
+.hero__center{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);z-index:4;will-change:transform,opacity;}
+.hero__name{font-size:clamp(4.2rem,20vw,20rem);font-weight:700;letter-spacing:-0.03em;line-height:0.84;}
+.hero__name span{display:block;}
+.hero__copy{max-width:560px;margin-top:36px;z-index:5;position:relative;will-change:opacity,transform;}
+.hero__role{display:flex;gap:12px;align-items:center;font-family:var(--font-mono);font-size:13px;letter-spacing:0.14em;color:var(--cyan);text-transform:uppercase;margin-bottom:18px;flex-wrap:wrap;}
+.hero__role .sep{color:var(--faint);}
+.hero__line{font-size:clamp(1.05rem,1.7vw,1.35rem);color:var(--text);opacity:.9;max-width:44ch;}
+.hero__cta{display:flex;gap:16px;margin-top:34px;flex-wrap:wrap;}
+
+.btn{display:inline-flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:12px;
+  letter-spacing:0.16em;text-transform:uppercase;padding:15px 24px;border:1px solid var(--line-strong);
+  color:var(--text);background:transparent;cursor:pointer;transition:border-color .3s,background .3s,color .3s;position:relative;overflow:hidden;}
+.btn:hover{border-color:var(--accent);background:rgba(94,139,255,0.08);}
+.btn--primary{border-color:var(--accent);background:rgba(94,139,255,0.10);}
+.btn__arrow{transition:transform .35s var(--ease);}
+.btn:hover .btn__arrow{transform:translateY(3px);}
+.btn--ext:hover .btn__arrow{transform:translate(3px,-3px);}
+
+.hero__foot{position:absolute;bottom:34px;left:0;right:0;z-index:6;}
+.hero__foot .wrap{display:flex;justify-content:space-between;align-items:flex-end;}
+.hero__foot .mono{font-size:11px;}
+.scroll-hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.scroll-hint .bar{width:1px;height:40px;background:linear-gradient(var(--cyan),transparent);animation:drop 2.4s var(--ease) infinite;}
+@keyframes drop{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* entrance animation */
+.reveal-up{opacity:0;transform:translateY(26px);}
+.hero-in .reveal-up{opacity:1;transform:none;transition:opacity 1s var(--ease),transform 1.1s var(--ease);}
+.hero-in .d1{transition-delay:.15s}.hero-in .d2{transition-delay:.3s}.hero-in .d3{transition-delay:.45s}
+.hero-in .d4{transition-delay:.6s}.hero-in .d5{transition-delay:.75s}
+
+/* ============================================================
+   SECTION shell
+   ============================================================ */
+section{position:relative;}
+.pad{padding:clamp(90px,14vh,180px) 0;}
+
+/* projects continue the planet surface into their background */
+#work{background:linear-gradient(180deg,#0a1324 0%, #070c17 30%, var(--bg) 100%);}
+
+/* ---- Projects: sticky visual + scrolling panels ---- */
+.projects__head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:24px;margin-bottom:60px;}
+.projects__index{display:flex;gap:22px;font-family:var(--font-mono);font-size:12px;letter-spacing:.15em;color:var(--faint);}
+.projects__index button{background:none;border:none;color:var(--faint);cursor:pointer;font:inherit;letter-spacing:inherit;transition:color .3s;padding:4px 0;}
+.projects__index button.active{color:var(--cyan);}
+
+.proj-grid{display:grid;grid-template-columns:0.92fr 1.08fr;gap:clamp(30px,6vw,90px);align-items:start;}
+.proj-visual-col{position:sticky;top:0;height:100vh;display:flex;align-items:center;}
+.proj-visual{position:relative;width:100%;aspect-ratio:1/1;max-height:76vh;}
+.proj-stage{position:absolute;inset:0;opacity:0;transform:scale(.96);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+.proj-stage.active{opacity:1;transform:none;}
+
+.proj-panels{display:flex;flex-direction:column;}
+.proj-panel{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:60px 0;opacity:.28;transition:opacity .5s var(--ease);}
+.proj-panel.active{opacity:1;}
+.proj-mission{font-family:var(--font-mono);font-size:12px;letter-spacing:.24em;color:var(--accent);margin-bottom:20px;}
+.proj-name{font-size:clamp(2.6rem,5vw,4.4rem);margin-bottom:10px;}
+.proj-sub{color:var(--cyan);font-family:var(--font-mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:26px;}
+.proj-desc{color:var(--muted);max-width:46ch;font-size:1.02rem;line-height:1.7;}
+.proj-desc strong{color:var(--text);font-weight:600;}
+.proj-tech{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;}
+.proj-tech span{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);padding:6px 11px;transition:border-color .3s,color .3s;}
+.proj-tech span:hover{border-color:var(--cyan-dim);color:var(--text);}
+
+/* telemetry metrics */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-top:34px;border:1px solid var(--line);}
+.metric{background:var(--bg);padding:20px 16px;}
+.metric__val{font-family:var(--font-display);font-weight:600;font-size:clamp(1.5rem,3vw,2.2rem);color:var(--text);letter-spacing:-0.02em;}
+.metric__val em{font-style:normal;color:var(--cyan);}
+.metric__lab{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:8px;line-height:1.4;}
+
+/* ---- project visuals ---- */
+.pv-frame{position:absolute;inset:0;border:1px solid var(--line-strong);background:rgba(12,17,27,0.5);backdrop-filter:blur(2px);}
+.pv-frame::before{content:attr(data-label);position:absolute;top:14px;left:16px;font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
+.pv-corner{position:absolute;width:12px;height:12px;border:1px solid var(--cyan-dim);}
+.pv-corner.tl{top:8px;left:8px;border-right:0;border-bottom:0}
+.pv-corner.tr{top:8px;right:8px;border-left:0;border-bottom:0}
+.pv-corner.bl{bottom:8px;left:8px;border-right:0;border-top:0}
+.pv-corner.br{bottom:8px;right:8px;border-left:0;border-top:0}
+
+/* echoOS visual: nested system rings + node grid */
+.echo-core{position:absolute;inset:0;display:grid;place-items:center;}
+.echo-ring{position:absolute;border:1px solid var(--line-strong);border-radius:50%;}
+.echo-node{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);}
+.echo-label{position:absolute;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase;}
+.echo-center{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,#1a3a6b,#0a1324);border:1px solid var(--accent);display:grid;place-items:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--cyan);}
+
+/* clausewatch visual: document -> fields */
+.cw-doc{position:absolute;left:8%;top:14%;width:44%;height:72%;border:1px solid var(--line-strong);background:rgba(10,15,26,0.7);padding:18px;}
+.cw-doc .ln{height:6px;background:var(--line-strong);margin-bottom:9px;border-radius:1px;}
+.cw-doc .ln.s{width:60%}.cw-doc .ln.m{width:82%}
+.cw-doc__tag{font-family:var(--font-mono);font-size:9px;letter-spacing:.2em;color:var(--muted);margin-bottom:14px;}
+.cw-fields{position:absolute;right:8%;top:16%;width:42%;display:flex;flex-direction:column;gap:10px;}
+.cw-field{border:1px solid var(--line);padding:11px 13px;background:rgba(12,17,27,0.6);display:flex;justify-content:space-between;align-items:center;}
+.cw-field .k{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--text);}
+.cw-field .c{font-family:var(--font-mono);font-size:10px;color:var(--cyan);}
+.cw-wire{position:absolute;inset:0;z-index:-1;}
+
+/* accessforge visual: pipeline */
+.af-pipe{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:0;padding:12% 14%;}
+.af-step{display:flex;align-items:center;gap:16px;padding:14px 0;position:relative;}
+.af-step__dot{width:34px;height:34px;border:1px solid var(--line-strong);border-radius:50%;display:grid;place-items:center;font-family:var(--font-mono);font-size:11px;color:var(--muted);flex-shrink:0;transition:all .4s;}
+.af-step.lit .af-step__dot{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 16px rgba(143,211,232,0.35);}
+.af-step__t{font-family:var(--font-mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:color .4s;}
+.af-step.lit .af-step__t{color:var(--text);}
+.af-connector{position:absolute;left:16.6px;top:48px;bottom:-14px;width:1px;background:var(--line);}
+.af-step:last-child .af-connector{display:none;}
+
+/* ============================================================
+   MISSION LOG (experience)
+   ============================================================ */
+.log{position:relative;}
+.log__line{position:absolute;left:calc(clamp(20px,5vw,64px) + 6px);top:0;bottom:0;width:1px;background:linear-gradient(var(--accent),var(--line) 12%, var(--line));}
+.log__items{display:flex;flex-direction:column;gap:clamp(60px,9vh,120px);}
+.exp{display:grid;grid-template-columns:1fr;gap:24px;position:relative;padding-left:56px;}
+.exp__node{position:absolute;left:0;top:6px;width:13px;height:13px;border-radius:50%;background:var(--bg);border:1px solid var(--accent);box-shadow:0 0 0 4px var(--bg),0 0 14px rgba(94,139,255,0.4);}
+.exp__meta{display:flex;flex-wrap:wrap;gap:16px 26px;align-items:baseline;}
+.exp__org{font-family:var(--font-display);font-size:clamp(1.4rem,2.6vw,2rem);font-weight:600;letter-spacing:-0.02em;}
+.exp__role{font-family:var(--font-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);}
+.exp__when{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--muted);margin-left:auto;}
+.exp__loc{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--faint);}
+.exp__body{color:var(--muted);max-width:70ch;display:flex;flex-direction:column;gap:12px;line-height:1.7;}
+.exp__body li{list-style:none;position:relative;padding-left:20px;}
+.exp__body li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:1px;background:var(--cyan-dim);}
+.exp__body strong{color:var(--text);font-weight:600;}
+.exp__metrics{display:flex;flex-wrap:wrap;gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px;width:fit-content;}
+.exp__metric{background:var(--bg);padding:16px 24px;}
+.exp__metric .v{font-family:var(--font-display);font-weight:600;font-size:1.6rem;color:var(--cyan);letter-spacing:-.02em;}
+.exp__metric .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+
+/* ============================================================
+   ABOUT / OFF THE CLOCK
+   ============================================================ */
+#about{background:linear-gradient(180deg,var(--bg) 0%, #090d18 50%, var(--bg) 100%);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:center;}
+.about__copy p{color:var(--muted);font-size:1.12rem;line-height:1.85;max-width:52ch;margin-bottom:22px;}
+.about__copy p strong{color:var(--text);font-weight:500;}
+.portrait{position:relative;aspect-ratio:4/5;border:1px solid var(--line-strong);background:
+  radial-gradient(80% 60% at 50% 30%, rgba(94,139,255,0.10), transparent 60%),var(--surface);
+  display:grid;place-items:center;overflow:hidden;}
+.portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.portrait__ph{display:flex;flex-direction:column;align-items:center;gap:14px;color:var(--faint);}
+.portrait__ph .ring{width:76px;height:76px;border:1px solid var(--line-strong);border-radius:50%;position:relative;}
+.portrait__ph .ring::before{content:"";position:absolute;inset:26px;border-radius:50%;background:var(--faint);opacity:.5;}
+.portrait__cap{position:absolute;bottom:14px;left:16px;font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;}
+
+/* space -> gaming motif: abstract four-button controller */
+.gaming{margin-top:clamp(50px,8vh,90px);border-top:1px solid var(--line);padding-top:50px;display:flex;gap:40px;align-items:center;flex-wrap:wrap;}
+.pad-motif{position:relative;width:120px;height:120px;flex-shrink:0;}
+.pad-motif .btn-dot{position:absolute;width:22px;height:22px;border:1px solid var(--line-strong);border-radius:50%;transition:all .4s;}
+.pad-motif .btn-dot.t{top:0;left:49px}
+.pad-motif .btn-dot.r{top:49px;right:0}
+.pad-motif .btn-dot.b{bottom:0;left:49px}
+.pad-motif .btn-dot.l{top:49px;left:0}
+.pad-motif:hover .btn-dot{border-color:var(--cyan);box-shadow:0 0 12px rgba(143,211,232,0.3);}
+.pad-motif .halo{position:absolute;inset:20px;border:1px solid var(--line);border-radius:50%;}
+.gaming__txt{max-width:44ch;color:var(--muted);}
+.gaming__txt .mono{margin-bottom:10px;display:block;}
+
+/* ============================================================
+   SYSTEMS & TOOLS
+   ============================================================ */
+.sys-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+.sys-mod{background:var(--bg);padding:34px 28px;transition:background .4s;}
+.sys-mod:hover{background:var(--surface);}
+.sys-mod__num{font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--accent);}
+.sys-mod__t{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin:14px 0 22px;letter-spacing:-.01em;}
+.sys-list{display:flex;flex-wrap:wrap;gap:8px;}
+.sys-list span{font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.04em;padding:7px 12px;border:1px solid var(--line);cursor:default;transition:color .25s,border-color .25s,transform .25s;}
+.sys-list span:hover{color:var(--text);border-color:var(--cyan-dim);transform:translateY(-2px);}
+
+/* education */
+.edu{display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:baseline;border-top:1px solid var(--line);padding-top:34px;margin-top:60px;}
+.edu__school{font-family:var(--font-display);font-size:clamp(1.3rem,2.4vw,1.9rem);font-weight:600;letter-spacing:-.02em;}
+.edu__deg{color:var(--muted);margin-top:6px;font-size:.98rem;}
+.edu__grad{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--cyan);text-align:right;}
+.edu__course{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--faint);margin-top:8px;}
+
+/* ============================================================
+   CONTACT / DEEP SPACE
+   ============================================================ */
+#contact{position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(90px,14vh,180px) 0 0;}
+.deep-planet{position:absolute;left:50%;top:-30px;width:180px;height:180px;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(60% 60% at 42% 34%, #1c3358, #0a1324 60%, #060a14);
+  box-shadow:inset 0 8px 20px -6px rgba(143,211,232,0.25),0 0 60px rgba(94,139,255,0.15);opacity:.75;}
+.contact__lead{font-family:var(--font-mono);font-size:12px;letter-spacing:.24em;color:var(--accent);text-transform:uppercase;text-align:center;margin-bottom:26px;}
+.contact__h{font-size:clamp(3rem,11vw,9rem);text-align:center;font-weight:700;letter-spacing:-.03em;line-height:0.9;}
+.contact__sub{text-align:center;color:var(--muted);font-size:1.15rem;margin-top:24px;}
+.contact__links{display:flex;flex-direction:column;max-width:640px;margin:64px auto 0;border-top:1px solid var(--line);}
+.clink{display:flex;justify-content:space-between;align-items:center;padding:24px 6px;border-bottom:1px solid var(--line);transition:padding .35s var(--ease),background .35s;}
+.clink:hover{padding-left:20px;padding-right:20px;background:rgba(94,139,255,0.04);}
+.clink__k{font-family:var(--font-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+.clink__v{display:flex;align-items:center;gap:14px;font-size:1.1rem;color:var(--text);}
+.clink__v .ar{color:var(--cyan);transition:transform .35s var(--ease);display:inline-block;}
+.clink:hover .clink__v .ar{transform:translate(5px,-5px);}
+.contact__foot{margin-top:clamp(80px,14vh,160px);text-align:center;padding-bottom:60px;}
+.contact__name{font-size:clamp(2.4rem,13vw,12rem);font-weight:700;letter-spacing:-.04em;line-height:0.9;color:transparent;
+  -webkit-text-stroke:1px var(--line-strong);}
+.contact__note{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;color:var(--faint);margin-top:30px;}
+
+/* ============================================================
+   scroll-reveal utility
+   ============================================================ */
+.r{opacity:0;transform:translateY(30px);transition:opacity .9s var(--ease),transform 1s var(--ease);}
+.r.in{opacity:1;transform:none;}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:900px){
+  .nav__links{position:fixed;inset:0;background:rgba(5,7,13,0.97);flex-direction:column;justify-content:center;gap:30px;
+    transform:translateY(-100%);transition:transform .5s var(--ease);z-index:49;}
+  .nav__links.open{transform:none;}
+  .nav__links a{font-size:16px;}
+  .nav__toggle{display:block;z-index:51;}
+  .proj-grid{grid-template-columns:1fr;}
+  .proj-visual-col{position:sticky;top:66px;height:44vh;padding:0;z-index:3;}
+  .proj-visual{max-height:none;height:100%;aspect-ratio:auto;max-width:400px;margin:0 auto;}
+  .proj-stage{display:none;opacity:1;transform:none;}
+  .proj-stage.active{display:block;}
+  .proj-panel{min-height:70vh;padding:24px 0;opacity:1;}
+  .proj-panels{gap:40px;}
+  .metrics{grid-template-columns:repeat(2,1fr);}
+  .about-grid{grid-template-columns:1fr;gap:40px;}
+  .portrait{max-width:360px;}
+  .sys-grid{grid-template-columns:1fr;}
+  .exp__when{margin-left:0;}
+  .edu{grid-template-columns:1fr;gap:14px;}
+  .edu__grad{text-align:left;}
+  .cursor{display:none;}
+}
+@media(max-width:520px){
+  .metrics{grid-template-columns:repeat(2,1fr);}
+  .hero__foot .wrap{flex-direction:column;gap:8px;align-items:flex-start;}
+  .hero__top{top:78px;}
+}
+
+/* reduced motion */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  *{animation:none!important;transition-duration:.001ms!important;}
+  .r,.reveal-up{opacity:1!important;transform:none!important;}
+  .scroll-hint{display:none;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="atmos" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="nav" aria-label="Primary">
+  <a class="nav__brand" href="#hero-pin" aria-label="Hriday Adani, home">
+    <span class="nav__name">HRIDAY ADANI</span>
+    <span class="nav__status"><span class="pulse"></span>SYSTEM ONLINE · 01 / PORTFOLIO</span>
+  </a>
+  <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks">Menu</button>
+  <div class="nav__links" id="navLinks">
+    <a href="#work" data-sec="work">Work</a>
+    <a href="#experience" data-sec="experience">Experience</a>
+    <a href="#about" data-sec="about">About</a>
+    <a href="#systems" data-sec="systems">Systems</a>
+    <a href="#contact" data-sec="contact">Contact</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ HERO ============ -->
+<section id="hero-pin" aria-label="Introduction">
+  <div class="hero" id="hero">
+    <div class="planet-glow" aria-hidden="true"></div>
+    <div class="planet" id="planet" aria-hidden="true"></div>
+
+    <!-- orbit behind name -->
+    <svg class="orbit-svg orbit-back" viewBox="0 0 1500 900" aria-hidden="true" id="orbitBack">
+      <ellipse class="orbit-path" cx="750" cy="450" rx="720" ry="250" transform="rotate(-14 750 450)"/>
+      <ellipse class="orbit-path" cx="750" cy="450" rx="520" ry="170" transform="rotate(-14 750 450)"/>
+    </svg>
+
+    <div class="hero__top">
+      <div class="wrap">
+        <div class="hero__tag reveal-up d1">
+          <span class="mono mono--accent">01 / SYSTEM ONLINE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero__center">
+      <div class="wrap">
+        <h1 class="hero__name">
+          <span class="reveal-up d2">HRIDAY</span>
+          <span class="reveal-up d3">ADANI</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- orbit in front of part of the name (depth motif) -->
+    <svg class="orbit-svg orbit-front" viewBox="0 0 1500 900" aria-hidden="true" id="orbitFront">
+      <defs>
+        <clipPath id="frontClip"><rect x="820" y="0" width="680" height="900"/></clipPath>
+      </defs>
+      <g clip-path="url(#frontClip)">
+        <ellipse class="orbit-path orbit-path--accent" cx="750" cy="450" rx="720" ry="250" transform="rotate(-14 750 450)"/>
+      </g>
+      <circle class="orbit-sat-glow" id="satGlow" cx="0" cy="0" r="10"/>
+      <circle class="orbit-sat" id="sat" cx="0" cy="0" r="4"/>
+    </svg>
+
+    <div class="hero__center" style="z-index:5;pointer-events:none;">
+      <div class="wrap" style="display:flex;justify-content:flex-end;">
+        <div class="hero__copy reveal-up d4" style="pointer-events:auto;margin-top:clamp(180px,26vh,320px);">
+          <div class="hero__role">
+            <span>Software Engineer</span><span class="sep">·</span>
+            <span>AI Systems</span><span class="sep">·</span>
+            <span>Research</span>
+          </div>
+          <p class="hero__line">I build intelligent systems, from research prototypes to production software.</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="#work">Explore work <span class="btn__arrow">↓</span></a>
+            <a class="btn btn--ext" href="#contact">Resume <span class="btn__arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero__foot reveal-up d5">
+      <div class="wrap">
+        <span class="mono">New Brunswick, NJ</span>
+        <span class="mono mono--accent">Open to 2027 opportunities</span>
+      </div>
+    </div>
+
+    <div class="scroll-hint" aria-hidden="true"><span class="bar"></span><span class="mono" style="font-size:10px">Enter orbit</span></div>
+  </div>
+</section>
+
+<!-- ============ WORK / SELECTED MISSIONS ============ -->
+<section id="work" class="pad" aria-label="Selected work">
+  <div class="wrap">
+    <div class="projects__head">
+      <div>
+        <div class="eyebrow"><span class="num">02</span><span class="dot"></span><span class="lab">Project Archive</span></div>
+        <h2 class="section-title">Selected Missions</h2>
+      </div>
+      <div class="projects__index" id="projIndex" aria-hidden="true">
+        <button data-jump="0" class="active">01 EchoOS</button>
+        <button data-jump="1">02 ClauseWatch</button>
+        <button data-jump="2">03 AccessForge</button>
+      </div>
+    </div>
+
+    <div class="proj-grid">
+      <!-- sticky visuals -->
+      <div class="proj-visual-col">
+        <div class="proj-visual" id="projVisual">
+
+          <!-- EchoOS -->
+          <div class="proj-stage active m-show" data-stage="0">
+            <div class="pv-frame" data-label="ECHOOS · LOCAL-FIRST SYSTEM LAYER">
+              <span class="pv-corner tl"></span><span class="pv-corner tr"></span><span class="pv-corner bl"></span><span class="pv-corner br"></span>
+              <div class="echo-core">
+                <div class="echo-ring" style="width:78%;height:78%"></div>
+                <div class="echo-ring" style="width:52%;height:52%"></div>
+                <div class="echo-center">SHELL</div>
+                <div class="echo-node" style="top:14%;left:50%"></div>
+                <div class="echo-node" style="top:50%;left:87%"></div>
+                <div class="echo-node" style="top:84%;left:52%"></div>
+                <div class="echo-node" style="top:52%;left:12%"></div>
+                <div class="echo-label" style="top:8%;left:42%">LLM · OLLAMA</div>
+                <div class="echo-label" style="top:48%;right:2%">RAG MEMORY</div>
+                <div class="echo-label" style="bottom:8%;left:44%">FILE I/O</div>
+                <div class="echo-label" style="top:50%;left:0">OPENAI</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ClauseWatch -->
+          <div class="proj-stage" data-stage="1">
+            <div class="pv-frame" data-label="CLAUSEWATCH · EXTRACTION PIPELINE">
+              <span class="pv-corner tl"></span><span class="pv-corner tr"></span><span class="pv-corner bl"></span><span class="pv-corner br"></span>
+              <svg class="cw-wire" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M52 30 H72" stroke="rgba(143,211,232,0.35)" stroke-width="0.4" fill="none"/>
+                <path d="M52 44 H72" stroke="rgba(143,211,232,0.35)" stroke-width="0.4" fill="none"/>
+                <path d="M52 58 H72" stroke="rgba(143,211,232,0.35)" stroke-width="0.4" fill="none"/>
+                <path d="M52 72 H72" stroke="rgba(143,211,232,0.35)" stroke-width="0.4" fill="none"/>
+              </svg>
+              <div class="cw-doc">
+                <div class="cw-doc__tag">CONTRACT.PDF</div>
+                <div class="ln m"></div><div class="ln s"></div><div class="ln"></div>
+                <div class="ln m"></div><div class="ln s"></div><div class="ln m"></div>
+                <div class="ln"></div><div class="ln s"></div>
+              </div>
+              <div class="cw-fields">
+                <div class="cw-field"><span class="k">Parties</span><span class="c">0.98</span></div>
+                <div class="cw-field"><span class="k">Dates</span><span class="c">0.95</span></div>
+                <div class="cw-field"><span class="k">Obligations</span><span class="c">0.91</span></div>
+                <div class="cw-field"><span class="k">Risks</span><span class="c">0.88</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AccessForge -->
+          <div class="proj-stage" data-stage="2">
+            <div class="pv-frame" data-label="ACCESSFORGE · REMEDIATION PIPELINE">
+              <span class="pv-corner tl"></span><span class="pv-corner tr"></span><span class="pv-corner bl"></span><span class="pv-corner br"></span>
+              <div class="af-pipe">
+                <div class="af-step" data-af="0"><div class="af-step__dot">01</div><div class="af-step__t">Scan</div><div class="af-connector"></div></div>
+                <div class="af-step" data-af="1"><div class="af-step__dot">02</div><div class="af-step__t">Detect</div><div class="af-connector"></div></div>
+                <div class="af-step" data-af="2"><div class="af-step__dot">03</div><div class="af-step__t">Fix</div><div class="af-connector"></div></div>
+                <div class="af-step" data-af="3"><div class="af-step__dot">04</div><div class="af-step__t">Verify</div><div class="af-connector"></div></div>
+                <div class="af-step" data-af="4"><div class="af-step__dot">05</div><div class="af-step__t">Pull request</div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- scrolling panels -->
+      <div class="proj-panels" id="projPanels">
+
+        <article class="proj-panel active" data-panel="0">
+          <div class="proj-mission">Mission 01</div>
+          <h3 class="proj-name">EchoOS</h3>
+          <div class="proj-sub">AI-Native Local System Layer</div>
+          <p class="proj-desc">A local-first system layer that augments ordinary OS interactions with autonomous workflows. The desktop shell is built on <strong>Tauri, React and Tailwind</strong>, and pairs <strong>OpenAI with local models via Ollama</strong> so automation keeps working offline. A memory engine built on <strong>ChromaDB embeddings and RAG</strong> gives it fast, grounded recall.</p>
+          <div class="metrics">
+            <div class="metric"><div class="metric__val">90<em>%</em></div><div class="metric__lab">Smaller build</div></div>
+            <div class="metric"><div class="metric__val">40<em>%</em></div><div class="metric__lab">Workflow efficiency</div></div>
+            <div class="metric"><div class="metric__val">65<em>%</em></div><div class="metric__lab">Faster retrieval</div></div>
+            <div class="metric"><div class="metric__val">15<em>+</em></div><div class="metric__lab">Automated workflows</div></div>
+          </div>
+          <div class="proj-tech">
+            <span>React</span><span>Tailwind CSS</span><span>Tauri CLI</span><span>Node.js</span><span>Ollama</span><span>ChromaDB</span><span>OpenAI</span>
+          </div>
+        </article>
+
+        <article class="proj-panel" data-panel="1">
+          <div class="proj-mission">Mission 02</div>
+          <h3 class="proj-name">ClauseWatch</h3>
+          <div class="proj-sub">AI-Powered Contract Intelligence SaaS</div>
+          <p class="proj-desc">A multi-tenant SaaS that turns raw contracts into structured, reviewable data. An <strong>LLM extraction pipeline</strong> pulls fields from PDF and DOCX with <strong>per-field confidence scoring</strong>. Tenants are isolated at the ORM layer with <strong>tenant-scoped queries</strong>, verified for zero cross-tenant leakage through automated integration tests, and secured with <strong>five independent HMAC token systems</strong>.</p>
+          <div class="metrics">
+            <div class="metric"><div class="metric__val">5</div><div class="metric__lab">HMAC token systems</div></div>
+            <div class="metric"><div class="metric__val">9</div><div class="metric__lab">Zero-downtime migrations</div></div>
+            <div class="metric"><div class="metric__val">0</div><div class="metric__lab">Cross-tenant leaks</div></div>
+            <div class="metric"><div class="metric__val">2</div><div class="metric__lab">Document formats</div></div>
+          </div>
+          <div class="proj-tech">
+            <span>Next.js</span><span>FastAPI</span><span>PostgreSQL</span><span>Alembic</span><span>OpenAI</span>
+          </div>
+        </article>
+
+        <article class="proj-panel" data-panel="2">
+          <div class="proj-mission">Mission 03</div>
+          <h3 class="proj-name">AccessForge</h3>
+          <div class="proj-sub">Accessibility Remediation Pipeline</div>
+          <p class="proj-desc">An end-to-end pipeline that scans React apps, generates <strong>WCAG fixes</strong>, verifies them independently, and opens GitHub pull requests. Orchestration runs on a <strong>LangGraph deterministic state machine</strong> with a crash-recoverable async pipeline backed by <strong>PostgreSQL state and Redis/RQ workers</strong>. It uses multimodal visual-regression comparison, confidence-gated source localization, and ElevenLabs TTS for multilingual audio summaries.</p>
+          <div class="metrics">
+            <div class="metric"><div class="metric__val">100<em>%</em></div><div class="metric__lab">Build pass rate</div></div>
+            <div class="metric"><div class="metric__val">20</div><div class="metric__lab">Benchmark cases</div></div>
+            <div class="metric"><div class="metric__val">6</div><div class="metric__lab">WCAG categories</div></div>
+            <div class="metric"><div class="metric__val">10<em>+</em></div><div class="metric__lab">Audio languages</div></div>
+          </div>
+          <div class="proj-tech">
+            <span>FastAPI</span><span>LangGraph</span><span>PostgreSQL</span><span>Redis / RQ</span><span>Docker</span><span>ElevenLabs</span><span>Google OAuth</span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXPERIENCE / MISSION LOG ============ -->
+<section id="experience" class="pad" aria-label="Experience">
+  <div class="wrap">
+    <div class="eyebrow r"><span class="num">03</span><span class="dot"></span><span class="lab">Experience</span></div>
+    <h2 class="section-title r" style="margin-bottom:70px">Mission Log</h2>
+
+    <div class="log">
+      <div class="log__line" aria-hidden="true"></div>
+      <div class="log__items">
+
+        <article class="exp r">
+          <span class="exp__node" aria-hidden="true"></span>
+          <div class="exp__meta">
+            <span class="exp__org">RCSB Protein Data Bank</span>
+            <span class="exp__role">Scientific Software Research Assistant</span>
+            <span class="exp__when">Jul 2026 — Present</span>
+          </div>
+          <span class="exp__loc">New Brunswick, NJ</span>
+          <ul class="exp__body">
+            <li>Built a new <strong>MCP server tool</strong> exposing the PDB search API to LLM agents, enabling multi-service AND/OR queries in a single call by composing filter nodes from 7 extended tools through a custom validation layer.</li>
+            <li>Traced parameter flow against tool documentation to fix <strong>two silent data-corruption bugs</strong> in result-grouping logic, preventing invalid API parameters and user configurations.</li>
+          </ul>
+        </article>
+
+        <article class="exp r">
+          <span class="exp__node" aria-hidden="true"></span>
+          <div class="exp__meta">
+            <span class="exp__org">Rutgers AI &amp; Data Science Collaboratory</span>
+            <span class="exp__role">Summer Research Fellow · CSII SURF</span>
+            <span class="exp__when">May 2026 — Jul 2026</span>
+          </div>
+          <span class="exp__loc">New Brunswick, NJ</span>
+          <ul class="exp__body">
+            <li>Redesigned a dictionary-driven column-typing model in <strong>py-mmcif's</strong> data-compression pipeline with automatic detection and value-scanning classification, cutting molecular structure file size by 27% and removing a dependency on prior processing.</li>
+            <li>Researched binary-encoding chain algorithms alongside four researchers, improving floating-point encoding to reduce compressed structure size by up to 76% across 37 varied PDB structures.</li>
+          </ul>
+          <div class="exp__metrics">
+            <div class="exp__metric"><div class="v">27%</div><div class="l">File size reduction</div></div>
+            <div class="exp__metric"><div class="v">76%</div><div class="l">Compression improvement</div></div>
+            <div class="exp__metric"><div class="v">37</div><div class="l">PDB structures</div></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT / OFF THE CLOCK ============ -->
+<section id="about" class="pad" aria-label="About">
+  <div class="wrap">
+    <div class="eyebrow r"><span class="num">04</span><span class="dot"></span><span class="lab">The person behind the work</span></div>
+    <h2 class="section-title r" style="margin-bottom:56px">Off the Clock</h2>
+
+    <div class="about-grid">
+      <div class="about__copy r">
+        <p>I'm Hriday, a <strong>Computer Science and Economics</strong> student at Rutgers University–New Brunswick. I enjoy building software where systems engineering, AI, and practical problem solving intersect.</p>
+        <p>Outside of development, I'm usually gaming on my PS5, reading about space, or disappearing into another technical rabbit hole.</p>
+
+        <div class="gaming">
+          <div class="pad-motif" aria-hidden="true">
+            <span class="halo"></span>
+            <span class="btn-dot t"></span><span class="btn-dot r"></span>
+            <span class="btn-dot b"></span><span class="btn-dot l"></span>
+          </div>
+          <div class="gaming__txt">
+            <span class="mono mono--accent">Space → controls</span>
+            The same instinct that pulls me toward orbital mechanics pulls me toward a well-designed system: a small set of inputs, precise feedback, and a state you can always read.
+          </div>
+        </div>
+      </div>
+
+      <div class="portrait r" id="portrait">
+        <!-- Swap in a real photo: place it at /public/portrait.jpg and set src below -->
+        <!-- <img src="portrait.jpg" alt="Hriday Adani" /> -->
+        <div class="portrait__ph">
+          <span class="ring"></span>
+          <span class="mono" style="font-size:10px">Portrait</span>
+        </div>
+        <span class="portrait__cap">HRIDAY ADANI · 01</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SYSTEMS & TOOLS ============ -->
+<section id="systems" class="pad" aria-label="Systems and tools">
+  <div class="wrap">
+    <div class="eyebrow r"><span class="num">05</span><span class="dot"></span><span class="lab">Technical stack</span></div>
+    <h2 class="section-title r" style="margin-bottom:56px">Systems &amp; Tools</h2>
+
+    <div class="sys-grid r">
+      <div class="sys-mod">
+        <div class="sys-mod__num">01</div>
+        <div class="sys-mod__t">Languages</div>
+        <div class="sys-list">
+          <span>Python</span><span>Java</span><span>C</span><span>Rust</span><span>JavaScript</span><span>SQL</span><span>PHP</span><span>HTML / CSS</span>
+        </div>
+      </div>
+      <div class="sys-mod">
+        <div class="sys-mod__num">02</div>
+        <div class="sys-mod__t">Systems &amp; Infra</div>
+        <div class="sys-list">
+          <span>FastAPI</span><span>Flask</span><span>PostgreSQL</span><span>Docker</span><span>Tauri</span><span>MCP</span><span>Alembic</span><span>Neon</span><span>Cloudflare</span><span>WSL</span>
+        </div>
+      </div>
+      <div class="sys-mod">
+        <div class="sys-mod__num">03</div>
+        <div class="sys-mod__t">Web &amp; Data</div>
+        <div class="sys-list">
+          <span>React</span><span>Next.js</span><span>Tailwind CSS</span><span>Pandas</span><span>Scikit-Learn</span><span>Git</span><span>VS Code</span><span>IntelliJ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="edu r">
+      <div>
+        <div class="edu__school">Rutgers University — New Brunswick</div>
+        <div class="edu__deg">B.S. Computer Science + Economics</div>
+      </div>
+      <div class="edu__course">Coursework: Data Structures · Artificial Intelligence · Algorithms</div>
+      <div class="edu__grad">Expected<br>May 2027</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT / DEEP SPACE ============ -->
+<section id="contact" aria-label="Contact">
+  <div class="deep-planet" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="contact__lead r">Next mission?</div>
+    <h2 class="contact__h r">Let's build<br>something<br>interesting.</h2>
+
+    <div class="contact__links r">
+      <a class="clink" href="mailto:hriday1136@gmail.com">
+        <span class="clink__k">Email</span>
+        <span class="clink__v">hriday1136@gmail.com <span class="ar">↗</span></span>
+      </a>
+      <a class="clink" href="https://linkedin.com/in/hridayadani" target="_blank" rel="noopener">
+        <span class="clink__k">LinkedIn</span>
+        <span class="clink__v">linkedin.com/in/hridayadani <span class="ar">↗</span></span>
+      </a>
+      <a class="clink" href="https://github.com/hriday1136" target="_blank" rel="noopener">
+        <span class="clink__k">GitHub</span>
+        <span class="clink__v">github.com/hriday1136 <span class="ar">↗</span></span>
+      </a>
+    </div>
+
+    <div class="contact__foot">
+      <div class="contact__name">HRIDAY ADANI</div>
+      <div class="contact__note">Software Engineer · AI Systems · Research · Rutgers 2027</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mqDesktop = window.matchMedia('(min-width:901px)');
+
+  /* ---------- hero entrance ---------- */
+  window.addEventListener('load', ()=> document.getElementById('hero').classList.add('hero-in'));
+  document.getElementById('hero').classList.add('hero-in'); // in case load already fired
+
+  /* ---------- starfield ---------- */
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars=[], W=0, H=0, dpr=Math.min(window.devicePixelRatio||1,2);
+  function sizeCanvas(){
+    W=canvas.width=innerWidth*dpr; H=canvas.height=innerHeight*dpr;
+    canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px';
+    const count = innerWidth<600?90:(innerWidth<1100?150:210);
+    stars=[];
+    for(let i=0;i<count;i++){
+      const depth=Math.random();
+      stars.push({
+        x:Math.random()*W, y:Math.random()*H,
+        z:depth, r:(depth*1.4+0.3)*dpr,
+        a:Math.random()*0.6+0.2,
+        tw:Math.random()*Math.PI*2
+      });
+    }
+  }
+  let scrollY=0;
+  function drawStars(t){
+    ctx.clearRect(0,0,W,H);
+    for(const s of stars){
+      const par = s.z * scrollY * 0.15 * dpr;
+      let y = (s.y - par) % H; if(y<0) y+=H;
+      const tw = reduce?1:(0.65+0.35*Math.sin(t*0.001+s.tw));
+      ctx.beginPath();
+      ctx.globalAlpha = s.a*tw;
+      ctx.fillStyle = s.z>0.85 ? '#8FD3E8' : '#F4F6F8';
+      ctx.arc(s.x,y,s.r,0,6.283);
+      ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    if(!reduce) rafStars=requestAnimationFrame(drawStars);
+  }
+  let rafStars;
+  sizeCanvas();
+  window.addEventListener('resize', ()=>{dpr=Math.min(window.devicePixelRatio||1,2); sizeCanvas();});
+  if(reduce){ drawStars(0); } else { rafStars=requestAnimationFrame(drawStars); }
+
+  /* ---------- nav scrolled + scrollspy + mobile toggle ---------- */
+  const nav=document.getElementById('nav');
+  const links=[...document.querySelectorAll('.nav__links a[data-sec]')];
+  const navLinks=document.getElementById('navLinks');
+  const navToggle=document.getElementById('navToggle');
+  navToggle.addEventListener('click', ()=>{
+    const open=navLinks.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open);
+    navToggle.textContent = open?'Close':'Menu';
+  });
+  navLinks.addEventListener('click', e=>{ if(e.target.tagName==='A'){navLinks.classList.remove('open');navToggle.textContent='Menu';navToggle.setAttribute('aria-expanded',false);} });
+
+  window.addEventListener('scroll', ()=>{
+    scrollY=window.scrollY;
+    nav.classList.toggle('scrolled', scrollY>40);
+  }, {passive:true});
+
+  const secs=['work','experience','about','systems','contact'].map(id=>document.getElementById(id));
+  const spy=new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        links.forEach(l=>l.classList.toggle('active', l.dataset.sec===en.target.id));
+      }
+    });
+  },{rootMargin:'-45% 0px -50% 0px'});
+  secs.forEach(s=>s&&spy.observe(s));
+
+  /* ---------- generic reveal ---------- */
+  const revs=[...document.querySelectorAll('.r')];
+  const revObs=new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('in'); revObs.unobserve(en.target); } });
+  },{rootMargin:'0px 0px -12% 0px', threshold:0.1});
+  revs.forEach(r=>revObs.observe(r));
+
+  /* ---------- cursor ring (desktop, fine pointer) ---------- */
+  if(matchMedia('(pointer:fine)').matches && !reduce){
+    const cur=document.getElementById('cursor');
+    let cx=innerWidth/2, cy=innerHeight/2, tx=cx, ty=cy;
+    window.addEventListener('mousemove', e=>{ tx=e.clientX; ty=e.clientY; cur.classList.add('on'); });
+    document.querySelectorAll('a,button').forEach(el=>{
+      el.addEventListener('mouseenter',()=>cur.classList.add('grow'));
+      el.addEventListener('mouseleave',()=>cur.classList.remove('grow'));
+    });
+    (function loop(){ cx+=(tx-cx)*0.18; cy+=(ty-cy)*0.18; cur.style.transform=`translate(${cx}px,${cy}px) translate(-50%,-50%)`; requestAnimationFrame(loop); })();
+  }
+
+  /* ---------- subtle pointer parallax on hero copy/orbits ---------- */
+  if(matchMedia('(pointer:fine)').matches && !reduce){
+    const orbitBack=document.getElementById('orbitBack');
+    const orbitFront=document.getElementById('orbitFront');
+    window.addEventListener('mousemove', e=>{
+      const dx=(e.clientX/innerWidth-0.5), dy=(e.clientY/innerHeight-0.5);
+      orbitBack.style.transform=`translate(-50%,-52%) translate(${dx*14}px,${dy*10}px)`;
+      orbitFront.style.transform=`translate(-50%,-52%) translate(${dx*22}px,${dy*16}px)`;
+    });
+  }
+
+  /* ---------- orbit satellite travels the front arc ---------- */
+  (function(){
+    const sat=document.getElementById('sat'), glow=document.getElementById('satGlow');
+    if(!sat) return;
+    const cx=750,cy=450,rx=720,ry=250,rot=-14*Math.PI/180;
+    let a=Math.PI*0.15;
+    function step(){
+      a += reduce?0:0.0022;
+      const ex=rx*Math.cos(a), ey=ry*Math.sin(a);
+      const x=cx+ex*Math.cos(rot)-ey*Math.sin(rot);
+      const y=cy+ex*Math.sin(rot)+ey*Math.cos(rot);
+      sat.setAttribute('cx',x); sat.setAttribute('cy',y);
+      glow.setAttribute('cx',x); glow.setAttribute('cy',y);
+      if(!reduce) requestAnimationFrame(step);
+    }
+    step();
+  })();
+
+  /* ============================================================
+     GSAP — hero "enter orbit" + project active states
+     ============================================================ */
+  if(window.gsap && window.ScrollTrigger && !reduce){
+    gsap.registerPlugin(ScrollTrigger);
+    document.documentElement.classList.add('gsap-active');
+
+    /* HERO: pin and drive the descent into orbit */
+    const heroTl = gsap.timeline({
+      scrollTrigger:{
+        trigger:'#hero-pin',
+        start:'top top',
+        end:'+=120%',
+        scrub:0.6,
+        pin:'#hero-pin',
+        pinSpacing:true,
+        anticipatePin:1
+      }
+    });
+    heroTl
+      .to('.hero__name', {yPercent:-42, ease:'none'}, 0)
+      .to('.hero__copy', {opacity:0, y:-40, ease:'none'}, 0)
+      .to('.hero__top,.hero__foot,.scroll-hint', {opacity:0, ease:'none'}, 0)
+      .to('#planet', {scale:1.9, yPercent:-24, ease:'none'}, 0)
+      .to('.planet-glow', {opacity:1.6, ease:'none'}, 0)
+      .to('.orbit-back,.orbit-front', {opacity:0, scale:1.15, ease:'none'}, 0);
+
+    /* PROJECTS: switch visual + panel + index as each panel crosses center */
+    const panels=[...document.querySelectorAll('.proj-panel')];
+    const stages=[...document.querySelectorAll('.proj-stage')];
+    const idxBtns=[...document.querySelectorAll('#projIndex button')];
+    const afSteps=[...document.querySelectorAll('.af-step')];
+
+    function setActive(i){
+      panels.forEach((p,n)=>p.classList.toggle('active', n===i));
+      stages.forEach((s,n)=>s.classList.toggle('active', n===i));
+      idxBtns.forEach((b,n)=>b.classList.toggle('active', n===i));
+      // atmospheric tint shift per project
+      const tint=['#0a1324','#0c1022','#0a1622'][i];
+      gsap.to('#work',{'--work-bg':tint,duration:.6});
+    }
+    panels.forEach((panel,i)=>{
+      ScrollTrigger.create({
+        trigger:panel, start:'top center', end:'bottom center',
+        onToggle:self=>{ if(self.isActive) setActive(i); }
+      });
+    });
+
+    /* AccessForge pipeline lights up progressively while its panel is in view */
+    ScrollTrigger.create({
+      trigger:'.proj-panel[data-panel="2"]',
+      start:'top center', end:'bottom center', scrub:true,
+      onUpdate:self=>{
+        const lit=Math.round(self.progress*5);
+        afSteps.forEach((s,n)=>s.classList.toggle('lit', n<lit));
+      }
+    });
+
+    /* index buttons jump to panel */
+    idxBtns.forEach(b=>b.addEventListener('click',()=>{
+      const i=+b.dataset.jump;
+      panels[i].scrollIntoView({behavior:'smooth',block:'center'});
+    }));
+
+    ScrollTrigger.refresh();
+    window.addEventListener('load',()=>ScrollTrigger.refresh());
+  } else {
+    /* reduced-motion / no-GSAP fallback: light everything, show first stage */
+    document.querySelectorAll('.af-step').forEach(s=>s.classList.add('lit'));
+    document.querySelectorAll('.proj-panel').forEach(p=>p.classList.add('active'));
+  }
+})();
+</script>
+</body>
+</html>
