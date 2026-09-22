@@ -262,6 +262,9 @@ html,body{overflow:hidden;height:100%;}
 .proj-desc{color:var(--muted);font-size:.98rem;line-height:1.7;}
 .proj-desc strong{color:var(--text);font-weight:600;}
 .proj-tech{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;}
+/* on the desktop 3-column layout, orbital-runtime.ts equalizes each .proj-tech to the
+   tallest one's real height, so a taller tag list (more wrapped rows) can't push .metrics
+   (which flushes to the bottom via margin-top:auto) out of alignment with the other columns */
 .proj-tech span{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);padding:6px 11px;transition:border-color .3s,color .3s;}
 .proj-tech span:hover{border-color:var(--cyan-dim);color:var(--text);}
 
@@ -398,7 +401,7 @@ html,body{overflow:hidden;height:100%;}
    ============================================================ */
 #contact{position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
   padding:clamp(90px,14vh,180px) 0 0;}
-.deep-planet{position:absolute;left:50%;top:-30px;width:180px;height:180px;transform:translateX(-50%);border-radius:50%;
+.deep-planet{position:absolute;left:50%;top:-30px;width:180px;height:180px;transform:translateX(-50%);border-radius:50%;z-index:-1;
   background:radial-gradient(60% 60% at 42% 34%, #1c3358, #0a1324 60%, #060a14);
   box-shadow:inset 0 8px 20px -6px rgba(143,211,232,0.25),0 0 60px rgba(94,139,255,0.15);opacity:.75;}
 .contact__lead{font-family:var(--font-mono);font-size:12px;letter-spacing:.24em;color:var(--accent);text-transform:uppercase;text-align:center;margin-bottom:26px;}

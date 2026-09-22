@@ -7,7 +7,7 @@ const ORBIT = { cx: 750, cy: 450, rx: 720, ry: 250, rot: (-14 * Math.PI) / 180 }
 
 // Points sit on the outer orbit ellipse (same geometry as the satellite path).
 const ORBIT_POINTS = [
-  { id: "work", label: "WORK", deg: 240 },
+  { id: "work", label: "PROJECTS", deg: 240 },
   { id: "experience", label: "EXPERIENCE", deg: 305 },
   { id: "about", label: "ABOUT", deg: 60 },
   { id: "systems", label: "SYSTEMS", deg: 100 },
@@ -58,7 +58,7 @@ export function OrbitalSite() {
         </button>
         <div className="nav__links" id="navLinks">
           <a href="#work" data-sec="work">
-            Work
+            Projects
           </a>
           <a href="#experience" data-sec="experience">
             Experience
@@ -193,7 +193,8 @@ export function OrbitalSite() {
                     <a
                       className="btn btn--ext"
                       href="/hriday-adani-resume.pdf"
-                      download="Hriday-Adani-Resume.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       Resume <span className="btn__arrow">↗</span>
                     </a>
@@ -211,7 +212,7 @@ export function OrbitalSite() {
           </div>
         </section>
 
-        <section id="work" className="view pad" aria-label="Selected work">
+        <section id="work" className="view pad" aria-label="Selected projects">
           <div className="work-bar" id="workBar" aria-hidden="true">
             <div className="log__line" />
             <div className="log__line-fill" id="workFill" />
