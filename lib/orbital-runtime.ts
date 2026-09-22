@@ -315,7 +315,10 @@ export function initOrbital() {
     await tween({ autoAlpha: 1, scale: 1, duration: dur(0.9), ease: "power2.out", clearProps: "transform,transformOrigin" }, el);
     ScrollTrigger.refresh();
     if (id === "experience") rocketSync?.(true);
-    if (id === "work") workSync?.(true);
+    if (id === "work") {
+      equalizeProjTech();
+      workSync?.(true);
+    }
     gsap.to(viewBack, { autoAlpha: 1, duration: dur(0.4) });
     if (id === "work") {
       afSteps.forEach((s, n) => {
@@ -515,6 +518,34 @@ export function initOrbital() {
   } else if (reduce) {
     document.querySelector(".exp")?.classList.add("is-hot");
   }
+
+  // Personal Missions: the three cards' tag lists wrap to different numbers of rows
+  // (AccessForge has more tags than the others), which would otherwise push its
+  // metrics grid out of line with the other two (whose .metrics both flush to the
+  // bottom via margin-top:auto). Equalizing each card's tag-list height to the
+  // tallest one keeps all three metrics grids aligned, using the tags' real
+  // measured height rather than a guessed pixel value.
+  const equalizeProjTech = () => {
+    const techEls = [...document.querySelectorAll<HTMLElement>("#work .proj-tech")];
+    if (!techEls.length) return;
+    techEls.forEach((el) => {
+      el.style.marginBottom = "";
+    });
+    if (window.innerWidth <= 1100) return; // single-column layout: no side-by-side alignment to keep
+    const heights = techEls.map((el) => el.getBoundingClientRect().height);
+    const max = Math.max(...heights);
+    // margin-bottom (not min-height/height) reserves the extra space in the flex
+    // layout without changing the tag list's own size, so a card with fewer tag
+    // rows still renders at its normal height, just with blank space below it.
+    techEls.forEach((el, i) => {
+      el.style.marginBottom = `${max - heights[i]}px`;
+    });
+  };
+  const onTechResize = () => {
+    if (mode === "work") equalizeProjTech();
+  };
+  window.addEventListener("resize", onTechResize);
+  cleanups.push(() => window.removeEventListener("resize", onTechResize));
 
   // Personal Missions: a continuous rocket bar that follows the view's scroll
   const workView = document.getElementById("work");
