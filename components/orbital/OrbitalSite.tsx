@@ -298,7 +298,7 @@ export function OrbitalSite() {
                   <strong>LSM-tree architecture</strong> with a WAL, immutable sorted SSTables with
                   sparse indexing, and size-tiered compaction. <strong>Crash recovery</strong> through
                   manifest checkpoints and WAL replay enforces fsync ordering and atomic file
-                  installation, verified by <strong>property testing against a reference model</strong>.
+                  installation.
                 </p>
                 <div className="metrics">
                   <div className="metric">
@@ -308,10 +308,8 @@ export function OrbitalSite() {
                     <div className="metric__lab">p99 read latency</div>
                   </div>
                   <div className="metric">
-                    <div className="metric__val">
-                      300<em>+</em>
-                    </div>
-                    <div className="metric__lab">Randomized op sequences</div>
+                    <div className="metric__val">2</div>
+                    <div className="metric__lab">Recovery layers</div>
                   </div>
                   <div className="metric">
                     <div className="metric__val">
@@ -406,8 +404,8 @@ export function OrbitalSite() {
                     <div className="metric__lab">HMAC token systems</div>
                   </div>
                   <div className="metric">
-                    <div className="metric__val">9</div>
-                    <div className="metric__lab">Zero-downtime migrations</div>
+                    <div className="metric__val">30</div>
+                    <div className="metric__lab">Validated test documents</div>
                   </div>
                   <div className="metric">
                     <div className="metric__val">0</div>
@@ -424,7 +422,6 @@ export function OrbitalSite() {
                   <span>Next.js</span>
                   <span>FastAPI</span>
                   <span>PostgreSQL</span>
-                  <span>Alembic</span>
                   <span>OpenAI</span>
                 </div>
               </article>
@@ -478,9 +475,7 @@ export function OrbitalSite() {
                   An end-to-end pipeline that scans React apps, generates <strong>WCAG fixes</strong>,
                   verifies them independently, and opens GitHub pull requests. Orchestration runs on a{" "}
                   <strong>LangGraph deterministic state machine</strong> with a crash-recoverable async
-                  pipeline backed by <strong>PostgreSQL state and Redis/RQ workers</strong>. Fixes
-                  are validated across <strong>2 independent React/Vite codebases</strong> with
-                  multimodal visual-regression comparison, and a{" "}
+                  pipeline backed by <strong>PostgreSQL state and Redis/RQ workers</strong>. A{" "}
                   <strong>confidence-gated localization check</strong> defers to human review instead
                   of guessing.
                 </p>
@@ -498,8 +493,8 @@ export function OrbitalSite() {
                     <div className="metric__lab">First-pass name fixes</div>
                   </div>
                   <div className="metric">
-                    <div className="metric__val">2</div>
-                    <div className="metric__lab">Independent codebases</div>
+                    <div className="metric__val">1</div>
+                    <div className="metric__lab">Real worker crash survived</div>
                   </div>
                   <div className="metric">
                     <div className="metric__val">0</div>
@@ -514,6 +509,91 @@ export function OrbitalSite() {
                   <span>Docker</span>
                   <span>Playwright</span>
                   <span>Axe-core</span>
+                </div>
+              </article>
+
+              <article className="proj-panel">
+                <div className="proj-visual">
+                  <div className="proj-stage">
+                    <div className="pv-frame" data-label="UNIHOP · RIDE DISPATCH">
+                      <span className="pv-corner tl" />
+                      <span className="pv-corner tr" />
+                      <span className="pv-corner bl" />
+                      <span className="pv-corner br" />
+                      <svg className="cw-wire" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                        <path
+                          d="M16 56 C32 56 36 38 50 38 S70 24 84 24"
+                          stroke="rgba(143,211,232,0.35)"
+                          strokeWidth="0.4"
+                          strokeDasharray="1.6 1.6"
+                          fill="none"
+                        />
+                      </svg>
+                      <div className="uh-node" style={{ top: "56%", left: "16%" }} />
+                      <div className="uh-node uh-node--driver" style={{ top: "38%", left: "50%" }} />
+                      <div className="uh-node" style={{ top: "24%", left: "84%" }} />
+                      <div className="echo-label" style={{ top: "61%", left: "8%" }}>
+                        PICKUP
+                      </div>
+                      <div className="echo-label" style={{ top: "28%", left: "44%" }}>
+                        DRIVER
+                      </div>
+                      <div className="echo-label" style={{ top: "29%", right: "6%" }}>
+                        DROP-OFF
+                      </div>
+                      <div className="uh-fields">
+                        <div className="cw-field">
+                          <span className="k">Offer</span>
+                          <span className="c">15s</span>
+                        </div>
+                        <div className="cw-field">
+                          <span className="k">PIN</span>
+                          <span className="c">Verified</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="proj-mission">Mission 04</div>
+                <h3 className="proj-name">UniHop</h3>
+                <div className="proj-sub">Campus Rideshare Mobile App</div>
+                <p className="proj-desc">
+                  A <strong>Rutgers-only campus rideshare app</strong> and <strong>HackRU Fall 2026
+                  winner</strong>, built by a 3-person team in 24 hours. Riders are matched to the
+                  nearest driver through <strong>15-second realtime offers</strong> that redispatch on
+                  decline, with PIN-verified trips and fixed rates under $10. An{" "}
+                  <strong>idempotent SpringBoot + PostgreSQL payment layer</strong> authorizes within
+                  the ride-creation transaction, then captures on completion or voids on cancellation,
+                  eliminating partial rides and double charges. Every merge to main is gated by{" "}
+                  <strong>GitHub Actions CI</strong>.
+                </p>
+                <div className="metrics">
+                  <div className="metric">
+                    <div className="metric__val">
+                      15<em>s</em>
+                    </div>
+                    <div className="metric__lab">Realtime offer window</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">210</div>
+                    <div className="metric__lab">CI backend tests</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">3</div>
+                    <div className="metric__lab">Breaking upgrades blocked</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric__val">
+                      24<em>h</em>
+                    </div>
+                    <div className="metric__lab">Hackathon build time</div>
+                  </div>
+                </div>
+                <div className="proj-tech">
+                  <span>Java</span>
+                  <span>SpringBoot</span>
+                  <span>PostgreSQL</span>
+                  <span>GitHub Actions</span>
                 </div>
               </article>
             </div>
@@ -572,7 +652,7 @@ export function OrbitalSite() {
                       the filter nodes from the 7 extended tools through a custom validation layer.
                     </li>
                     <li>
-                      Rectified <strong>2 silent data corruption bugs</strong> in the MCP server&apos;s
+                      Fixed <strong>2 silent data corruption bugs</strong> in the MCP server&apos;s
                       result-grouping logic by tracing parameter flow against the tool&apos;s own
                       docstrings, preventing the formation of invalid API parameters and user
                       configurations.
@@ -591,9 +671,9 @@ export function OrbitalSite() {
                   <ul className="exp__body">
                     <li>
                       Redesigned a dictionary-driven column-typing classifier in{" "}
-                      <strong>py-mmcif</strong>, an open-source Python package, adding automatic data
-                      type detection to cut molecular structure file sizes by 27%, submitted upstream as
-                      a pull request.
+                      <strong>py-mmcif</strong>, an open-source Python package, cutting molecular
+                      structure file sizes by 27% across an archive serving ~5M downloads per day;
+                      shipped to production.
                     </li>
                     <li>
                       Optimized floating-point binary encoding in py-mmcif&apos;s compression pipeline,
@@ -706,7 +786,6 @@ export function OrbitalSite() {
                   <span>Flask</span>
                   <span>PostgreSQL</span>
                   <span>Docker</span>
-                  <span>Tauri</span>
                   <span>MCP</span>
                   <span>Alembic</span>
                   <span>Redis</span>
@@ -722,6 +801,7 @@ export function OrbitalSite() {
                   <span>React</span>
                   <span>Next.js</span>
                   <span>Tailwind CSS</span>
+                  <span>SpringBoot</span>
                   <span>LangGraph</span>
                   <span>Playwright</span>
                   <span>Axe-core</span>
